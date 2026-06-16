@@ -1,0 +1,7 @@
+{
+  "name": "yahoo-ad-dashboard",
+  "version": "1.0.0",
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.0.0"
+  }
+}

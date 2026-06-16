@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tu-hacci Yahoo!広告ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F9F5F0;
+  --blush: #E8C4B8;
+  --dusty-rose: #C9897A;
+  --mauve: #9B6B7A;
+  --plum: #5C3D52;
+  --charcoal: #2D2228;
+  --soft-gold: #C8A882;
+  --light-gold: #EDD9B8;
+  --muted-sage: #A8B5A2;
+  --pale-blush: #F2E4DE;
+  --border: rgba(92,61,82,0.15);
+  --shadow: 0 2px 20px rgba(92,61,82,0.08);
+  --shadow-lg: 0 8px 40px rgba(92,61,82,0.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* ナビ */
+.nav {
+  background: var(--plum);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(44,26,40,0.3);
+  gap: 0;
+}
+.brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--light-gold);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  padding-right: 24px;
+  border-right: 1px solid rgba(200,168,130,0.3);
+  margin-right: 20px;
+}
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+.nav-tab {
+  padding: 8px 16px;
+  color: rgba(249,245,240,0.65);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  letter-spacing: 0.03em;
+}
+.nav-tab:hover { color: var(--light-gold); background: rgba(255,255,255,0.08); }
+.nav-tab.active { color: var(--charcoal); background: var(--cream); font-weight: 700; }
+
+/* フィルターバー */
+.filter-bar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.filter-label { font-size: 11px; color: var(--mauve); font-weight: 500; letter-spacing: 0.05em; }
+.period-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--charcoal);
+  transition: all 0.2s;
+}
+.period-btn:hover { border-color: var(--mauve); color: var(--plum); }
+.period-btn.active { background: var(--plum); color: white; border-color: var(--plum); }
+.date-inputs { display: flex; align-items: center; gap: 8px; }
+.date-input {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--charcoal);
+  background: white;
+}
+.refresh-btn {
+  margin-left: auto;
+  padding: 6px 18px;
+  background: var(--plum);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.refresh-btn:hover { background: var(--mauve); }
+.refresh-btn.loading { opacity: 0.7; cursor: not-allowed; }
+
+/* ページ */
+.page { display: none; padding: 24px; max-width: 1600px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* カード */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--mauve);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* KPIグリッド */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--soft-gold);
+}
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--mauve);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--plum);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-sub { font-size: 10px; color: var(--mauve); }
+
+/* グリッドレイアウト */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media (max-width: 1000px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* チャート */
+.chart-wrap { position: relative; height: 260px; }
+
+/* テーブル */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--mauve);
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.data-table th.num { text-align: right; }
+.data-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--charcoal);
+}
+.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--pale-blush); }
+.roas-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.roas-good { background: #e6f4ea; color: #1a7340; }
+.roas-mid  { background: #fff8e1; color: #b07a00; }
+.roas-bad  { background: #fce8e6; color: #c0392b; }
+
+/* ローディング */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(249,245,240,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  flex-direction: column;
+  gap: 16px;
+}
+.loading-overlay.hidden { display: none; }
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--plum);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 12px; color: var(--mauve); letter-spacing: 0.05em; }
+
+/* バッジ */
+.campaign-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.badge-all { background: #e8f0fe; color: #1a73e8; }
+.badge-sale { background: #fce8e6; color: #c0392b; }
+.badge-kw { background: #e6f4ea; color: #1a7340; }
+
+.section-gap { margin-bottom: 20px; }
+.table-scroll { overflow-x: auto; }
+
+/* タブ内タブ */
+.sub-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.sub-tab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--mauve);
+  transition: all 0.2s;
+}
+.sub-tab.active { background: var(--plum); color: white; border-color: var(--plum); }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">データを取得中...</div>
+</div>
+
+<!-- ナビ -->
+<nav class="nav">
+  <div class="brand">tu-hacci</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview')">サマリー</button>
+    <button class="nav-tab" onclick="showPage('item')">アイテムマッチ</button>
+    <button class="nav-tab" onclick="showPage('kw')">キーワード広告</button>
+  </div>
+</nav>
+
+<!-- フィルターバー -->
+<div class="filter-bar">
+  <span class="filter-label">期間</span>
+  <button class="period-btn" onclick="setPeriod(7)">7日</button>
+  <button class="period-btn active" onclick="setPeriod(30)">30日</button>
+  <button class="period-btn" onclick="setPeriod(60)">60日</button>
+  <button class="period-btn" onclick="setPeriod(90)">90日</button>
+  <div class="date-inputs">
+    <input type="date" class="date-input" id="dateFrom">
+    <span>〜</span>
+    <input type="date" class="date-input" id="dateTo">
+  </div>
+  <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">
+    ↻ 更新
+  </button>
+</div>
+
+<!-- サマリーページ -->
+<div class="page active" id="page-overview">
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="grid-2 section-gap">
+    <div class="card">
+      <div class="card-title">広告費・売上推移</div>
+      <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROAS推移</div>
+      <div class="chart-wrap"><canvas id="chartRoas"></canvas></div>
+    </div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title">キャンペーン別パフォーマンス</div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableCampaign"></table>
+    </div>
+  </div>
+</div>
+
+<!-- アイテムマッチページ -->
+<div class="page" id="page-item">
+  <div class="kpi-grid" id="kpiItemGrid"></div>
+  <div class="grid-2 section-gap">
+    <div class="card">
+      <div class="card-title">広告費・売上推移（アイテムマッチ）</div>
+      <div class="chart-wrap"><canvas id="chartItemDaily"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROAS推移（アイテムマッチ）</div>
+      <div class="chart-wrap"><canvas id="chartItemRoas"></canvas></div>
+    </div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title">商品別パフォーマンス（広告費順）</div>
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="filterItems('all')">全キャンペーン</button>
+      <button class="sub-tab" onclick="filterItems('全商品広告2')">全商品広告2</button>
+      <button class="sub-tab" onclick="filterItems('商品広告2')">商品広告2</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableItems"></table>
+    </div>
+  </div>
+</div>
+
+<!-- キーワード広告ページ -->
+<div class="page" id="page-kw">
+  <div class="kpi-grid" id="kpiKwGrid"></div>
+  <div class="grid-2 section-gap">
+    <div class="card">
+      <div class="card-title">広告費・売上推移（KW広告）</div>
+      <div class="chart-wrap"><canvas id="chartKwDaily"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROAS推移（KW広告）</div>
+      <div class="chart-wrap"><canvas id="chartKwRoas"></canvas></div>
+    </div>
+  </div>
+  <div class="card section-gap">
+    <div class="card-title">グループ別パフォーマンス</div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableKw"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 設定
+// ============================================================
+const API_BASE = '/api/data';
+let allItemsData = [];
+let charts = {};
+
+// ============================================================
+// 日付初期化
+// ============================================================
+function initDates() {
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(today.getDate() - 29);
+  document.getElementById('dateTo').value = fmt(today);
+  document.getElementById('dateFrom').value = fmt(from);
+}
+
+function fmt(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function setPeriod(days) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(today.getDate() - (days - 1));
+  document.getElementById('dateTo').value = fmt(today);
+  document.getElementById('dateFrom').value = fmt(from);
+  loadAll();
+}
+
+function getDates() {
+  return {
+    since: document.getElementById('dateFrom').value,
+    until: document.getElementById('dateTo').value,
+  };
+}
+
+// ============================================================
+// ページ切り替え
+// ============================================================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// API取得
+// ============================================================
+async function fetchData(type) {
+  const { since, until } = getDates();
+  const res = await fetch(`${API_BASE}?type=${type}&since=${since}&until=${until}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ============================================================
+// フォーマット
+// ============================================================
+const num = v => v == null ? '-' : Number(v).toLocaleString('ja-JP', { maximumFractionDigits: 0 });
+const pct = v => v == null ? '-' : Number(v).toFixed(1) + '%';
+const yen = v => v == null ? '-' : '¥' + Number(v).toLocaleString('ja-JP', { maximumFractionDigits: 0 });
+
+function roasPill(v) {
+  const r = Number(v);
+  const cls = r >= 300 ? 'roas-good' : r >= 150 ? 'roas-mid' : 'roas-bad';
+  return `<span class="roas-pill ${cls}">${pct(v)}</span>`;
+}
+
+function campaignBadge(name) {
+  if (name === '全商品広告2') return `<span class="campaign-badge badge-all">全商品</span>`;
+  if (name === '商品広告2') return `<span class="campaign-badge badge-sale">SALE</span>`;
+  return `<span class="campaign-badge badge-kw">KW</span>`;
+}
+
+// ============================================================
+// KPIカード
+// ============================================================
+function renderKpi(containerId, data) {
+  const totals = data.reduce((acc, r) => {
+    acc.cost += Number(r.cost) || 0;
+    acc.sales += Number(r.sales) || 0;
+    acc.clicks += Number(r.clicks) || 0;
+    acc.imps += Number(r.imps) || 0;
+    acc.orders += Number(r.orders) || 0;
+    return acc;
+  }, { cost: 0, sales: 0, clicks: 0, imps: 0, orders: 0 });
+
+  const roas = totals.cost > 0 ? (totals.sales / totals.cost * 100) : 0;
+  const ctr = totals.imps > 0 ? (totals.clicks / totals.imps * 100) : 0;
+  const cvr = totals.clicks > 0 ? (totals.orders / totals.clicks * 100) : 0;
+  const cpc = totals.clicks > 0 ? (totals.cost / totals.clicks) : 0;
+
+  const kpis = [
+    { label: 'ROAS', value: pct(roas), sub: '広告費用対効果' },
+    { label: '広告費', value: yen(totals.cost), sub: '合計消化金額' },
+    { label: '売上', value: yen(totals.sales), sub: '広告経由売上' },
+    { label: 'クリック', value: num(totals.clicks), sub: 'CTR ' + pct(ctr) },
+    { label: 'CV数', value: num(totals.orders), sub: 'CVR ' + pct(cvr) },
+    { label: 'CPC', value: yen(cpc), sub: 'クリック単価' },
+    { label: 'インプレ', value: num(totals.imps), sub: '表示回数' },
+  ];
+
+  document.getElementById(containerId).innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// チャート描画
+// ============================================================
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function renderLineChart(canvasId, dailyData, label1, key1, label2, key2, color1, color2) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dailyData.map(d => d.date),
+      datasets: [
+        {
+          label: label1,
+          data: dailyData.map(d => Number(d[key1]) || 0),
+          borderColor: color1,
+          backgroundColor: color1 + '20',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 3,
+          yAxisID: 'y',
+        },
+        {
+          label: label2,
+          data: dailyData.map(d => Number(d[key2]) || 0),
+          borderColor: color2,
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 3,
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { font: { family: 'Zen Kaku Gothic New', size: 11 }, color: '#2D2228' } } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, maxRotation: 45 } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 } } },
+        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } } },
+      }
+    }
+  });
+}
+
+function renderRoasChart(canvasId, dailyData) {
+  destroyChart(canvasId);
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: dailyData.map(d => d.date),
+      datasets: [{
+        label: 'ROAS (%)',
+        data: dailyData.map(d => Number(d.roas) || 0),
+        backgroundColor: dailyData.map(d => Number(d.roas) >= 300 ? '#1a734040' : Number(d.roas) >= 150 ? '#b07a0040' : '#c0392b40'),
+        borderColor: dailyData.map(d => Number(d.roas) >= 300 ? '#1a7340' : Number(d.roas) >= 150 ? '#b07a00' : '#c0392b'),
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: { line1: { type: 'line', yMin: 300, yMax: 300, borderColor: '#1a7340', borderWidth: 1, borderDash: [4,4] } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, maxRotation: 45 } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, callback: v => v + '%' } },
+      }
+    }
+  });
+}
+
+// ============================================================
+// テーブル描画
+// ============================================================
+function renderCampaignTable(data) {
+  const thead = `<thead><tr>
+    <th>キャンペーン</th>
+    <th class="num">広告費</th>
+    <th class="num">売上</th>
+    <th class="num">ROAS</th>
+    <th class="num">クリック</th>
+    <th class="num">CTR</th>
+    <th class="num">CV数</th>
+    <th class="num">CVR</th>
+    <th class="num">CPC</th>
+  </tr></thead>`;
+  const rows = data.map(r => `<tr>
+    <td>${campaignBadge(r.campaign_name)} ${r.campaign_name}</td>
+    <td class="num">${yen(r.cost)}</td>
+    <td class="num">${yen(r.sales)}</td>
+    <td class="num">${roasPill(r.roas)}</td>
+    <td class="num">${num(r.clicks)}</td>
+    <td class="num">${pct(r.ctr)}</td>
+    <td class="num">${num(r.orders)}</td>
+    <td class="num">${pct(r.cvr)}</td>
+    <td class="num">${yen(r.cpc)}</td>
+  </tr>`).join('');
+  document.getElementById('tableCampaign').innerHTML = thead + '<tbody>' + rows + '</tbody>';
+}
+
+function renderItemsTable(data) {
+  const thead = `<thead><tr>
+    <th>品番</th>
+    <th>商品名</th>
+    <th>キャンペーン</th>
+    <th class="num">広告費</th>
+    <th class="num">売上</th>
+    <th class="num">ROAS</th>
+    <th class="num">CV数</th>
+    <th class="num">CVR</th>
+    <th class="num">クリック</th>
+  </tr></thead>`;
+  const rows = data.map(r => `<tr>
+    <td><code style="font-size:11px">${r.ysrid || '-'}</code></td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item_name}">${r.item_name || '-'}</td>
+    <td>${campaignBadge(r.campaign_name)}</td>
+    <td class="num">${yen(r.cost)}</td>
+    <td class="num">${yen(r.sales)}</td>
+    <td class="num">${roasPill(r.roas)}</td>
+    <td class="num">${num(r.orders)}</td>
+    <td class="num">${pct(r.cvr)}</td>
+    <td class="num">${num(r.clicks)}</td>
+  </tr>`).join('');
+  document.getElementById('tableItems').innerHTML = thead + '<tbody>' + rows + '</tbody>';
+}
+
+function renderKwTable(data) {
+  const thead = `<thead><tr>
+    <th>グループ名</th>
+    <th class="num">広告費</th>
+    <th class="num">売上</th>
+    <th class="num">ROAS</th>
+    <th class="num">CV数</th>
+    <th class="num">CVR</th>
+    <th class="num">クリック</th>
+    <th class="num">インプレ</th>
+  </tr></thead>`;
+  const rows = data.map(r => `<tr>
+    <td>${r.ad_group_name}</td>
+    <td class="num">${yen(r.cost)}</td>
+    <td class="num">${yen(r.sales)}</td>
+    <td class="num">${roasPill(r.roas)}</td>
+    <td class="num">${num(r.orders)}</td>
+    <td class="num">${pct(r.cvr)}</td>
+    <td class="num">${num(r.clicks)}</td>
+    <td class="num">${num(r.imps)}</td>
+  </tr>`).join('');
+  document.getElementById('tableKw').innerHTML = thead + '<tbody>' + rows + '</tbody>';
+}
+
+// ============================================================
+// 商品フィルター
+// ============================================================
+function filterItems(campaign) {
+  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  const filtered = campaign === 'all' ? allItemsData : allItemsData.filter(r => r.campaign_name === campaign);
+  renderItemsTable(filtered);
+}
+
+// ============================================================
+// データ全ロード
+// ============================================================
+async function loadAll() {
+  const overlay = document.getElementById('loadingOverlay');
+  const btn = document.getElementById('refreshBtn');
+  overlay.classList.remove('hidden');
+  btn.classList.add('loading');
+  btn.textContent = '取得中...';
+
+  try {
+    const [summary, daily, items, keywords, kwDaily] = await Promise.all([
+      fetchData('summary'),
+      fetchData('daily'),
+      fetchData('items'),
+      fetchData('keywords'),
+      fetchData('kw_daily'),
+    ]);
+
+    // サマリーページ
+    renderKpi('kpiGrid', summary);
+    renderLineChart('chartDaily', daily, '広告費', 'cost', '売上', 'sales', '#C9897A', '#5C3D52');
+    renderRoasChart('chartRoas', daily);
+    renderCampaignTable(summary);
+
+    // アイテムマッチページ
+    const itemSummary = summary.filter(r => r.campaign_name !== 'キーワード広告');
+    renderKpi('kpiItemGrid', itemSummary);
+    renderLineChart('chartItemDaily', daily, '広告費', 'cost', '売上', 'sales', '#C9897A', '#5C3D52');
+    renderRoasChart('chartItemRoas', daily);
+    allItemsData = items;
+    renderItemsTable(items);
+
+    // KWページ
+    renderKpi('kpiKwGrid', summary.filter(r => r.campaign_name === 'キーワード広告').length > 0
+      ? summary.filter(r => r.campaign_name === 'キーワード広告')
+      : [{ cost: 0, sales: 0, clicks: 0, imps: 0, orders: 0 }]);
+    renderLineChart('chartKwDaily', kwDaily, '広告費', 'cost', '売上', 'sales', '#A8B5A2', '#5C3D52');
+    renderRoasChart('chartKwRoas', kwDaily);
+    renderKwTable(keywords);
+
+  } catch (err) {
+    alert('データ取得エラー: ' + err.message);
+    console.error(err);
+  } finally {
+    overlay.classList.add('hidden');
+    btn.classList.remove('loading');
+    btn.innerHTML = '↻ 更新';
+  }
+}
+
+// ============================================================
+// 初期化
+// ============================================================
+initDates();
+loadAll();
+</script>
+</body>
+</html>
