@@ -10,9 +10,9 @@ const DATASET = 'yahoo_ads';
 
 const getPeriodFilter = (period) => {
   switch (period) {
-    case 'last':   return DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 MONTH), MONTH);
-    case 'before': return DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 2 MONTH), MONTH);
-    default:       return DATE_TRUNC(date, MONTH) = DATE_TRUNC(CURRENT_DATE('Asia/Tokyo'), MONTH);
+    case 'last':   return `DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 MONTH), MONTH)`;
+    case 'before': return `DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 2 MONTH), MONTH)`;
+    default:       return `DATE_TRUNC(date, MONTH) = DATE_TRUNC(CURRENT_DATE('Asia/Tokyo'), MONTH)`;
   }
 };
 
@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { type = 'summary', period = 'now' } = req.query;
-  const periodFilter = getPeriodFilter(period);
+  const pf = getPeriodFilter(period);
 
   try {
     const bq = getClient();
@@ -30,22 +30,22 @@ module.exports = async (req, res) => {
 
     switch (type) {
       case 'summary':
-        query = SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..item_daily\ WHERE  GROUP BY campaign_name ORDER BY spend DESC;
+        query = `SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \`${PROJECT}.${DATASET}.item_daily\` WHERE ${pf} GROUP BY campaign_name ORDER BY spend DESC`;
         break;
       case 'kw_summary':
-        query = SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..kw_daily\ WHERE  GROUP BY campaign_name;
+        query = `SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \`${PROJECT}.${DATASET}.kw_daily\` WHERE ${pf} GROUP BY campaign_name`;
         break;
       case 'daily':
-        query = SELECT date, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \${PROJECT}..item_daily\ WHERE  GROUP BY date ORDER BY date ASC;
+        query = `SELECT date, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \`${PROJECT}.${DATASET}.item_daily\` WHERE ${pf} GROUP BY date ORDER BY date ASC`;
         break;
       case 'items':
-        query = SELECT campaign_name, ysrid, item_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..item_daily\ WHERE  AND item_name IS NOT NULL AND item_name != '' GROUP BY campaign_name, ysrid, item_name ORDER BY spend DESC LIMIT 50;
+        query = `SELECT campaign_name, ysrid, item_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \`${PROJECT}.${DATASET}.item_daily\` WHERE ${pf} AND item_name IS NOT NULL AND item_name != '' GROUP BY campaign_name, ysrid, item_name ORDER BY spend DESC LIMIT 50`;
         break;
       case 'kw_groups':
-        query = SELECT ad_group_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..kw_daily\ WHERE  GROUP BY ad_group_name ORDER BY spend DESC;
+        query = `SELECT ad_group_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \`${PROJECT}.${DATASET}.kw_daily\` WHERE ${pf} GROUP BY ad_group_name ORDER BY spend DESC`;
         break;
       case 'kw_detail':
-        query = SELECT ad_group_name AS grp, search_keyword AS kw, item_name AS item, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \${PROJECT}..kw_daily\ WHERE  AND search_keyword IS NOT NULL AND search_keyword != '' GROUP BY grp, kw, item ORDER BY spend DESC LIMIT 100;
+        query = `SELECT ad_group_name AS grp, search_keyword AS kw, item_name AS item, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \`${PROJECT}.${DATASET}.kw_daily\` WHERE ${pf} AND search_keyword IS NOT NULL AND search_keyword != '' GROUP BY grp, kw, item ORDER BY spend DESC LIMIT 100`;
         break;
       default:
         return res.status(400).json({ ok: false, error: 'Invalid type' });
