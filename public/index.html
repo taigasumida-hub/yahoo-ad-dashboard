@@ -8,474 +8,536 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root{
-    --plum:#5C3D52;--plum-dark:#3d2638;--plum-light:#7a5569;
-    --blush:#E8C4B8;--blush-light:#f5e8e1;--gold:#C8A882;
-    --bg:#f7f4f2;--card:#ffffff;--border:rgba(92,61,82,0.12);
-    --tx:#2a1f25;--txs:#7a6470;--txh:#b0a0aa;
-    --up:#3B6D11;--dn:#A32D2D;
-    --fb:'Cormorant Garamond',Georgia,serif;
-    --fj:'Zen Kaku Gothic New',-apple-system,sans-serif;
-    --r:10px;--rs:6px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5}
-
-  /* PW */
-  #pw{position:fixed;inset:0;background:var(--plum-dark);display:flex;align-items:center;justify-content:center;z-index:1000}
-  .pwb{background:var(--card);border-radius:14px;padding:40px 44px;text-align:center;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
-  .pwb .logo{font-family:var(--fb);font-size:26px;color:var(--plum);margin-bottom:4px}
-  .pwb .sub{font-size:12px;color:var(--txs);margin-bottom:28px;letter-spacing:.05em}
-  .pwb input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--fj);font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px;transition:border-color .15s}
-  .pwb input:focus{border-color:var(--plum)}
-  .pwb button{width:100%;padding:11px;background:var(--plum);color:#f5e8e1;border:none;border-radius:var(--rs);font-family:var(--fj);font-size:14px;font-weight:500;cursor:pointer}
-
-  /* LAYOUT */
-  #main{display:none;min-height:100vh}
-  .hdr{background:var(--plum);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
-  .hdr-l{display:flex;align-items:baseline;gap:10px}
-  .brand{font-family:var(--fb);font-size:20px;color:var(--blush-light);letter-spacing:.04em}
-  .tag{font-size:11px;color:var(--blush);opacity:.7;letter-spacing:.06em}
-  .hdr-r{display:flex;align-items:center;gap:16px}
-  .upd{font-size:11px;color:var(--blush);opacity:.65}
-  .pgrp{display:flex;gap:4px}
-  .pbtn{background:transparent;border:1px solid rgba(232,196,184,.3);color:var(--blush);font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:var(--fj);transition:all .15s}
-  .pbtn.on{background:rgba(232,196,184,.18);border-color:var(--blush)}
-  .tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;padding:0 24px}
-  .tab{padding:13px 18px;font-size:13px;color:var(--txs);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
-  .tab.on{color:var(--plum);border-bottom-color:var(--plum);font-weight:500}
-  .cnt{padding:20px 24px;max-width:1280px;margin:0 auto}
-  .panel{display:none}.panel.on{display:block}
-
-  /* LOADING */
-  .loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--txs);font-size:13px;gap:10px}
-  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--plum);border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* KPI */
-  .kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-  .kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
-  .klbl{font-size:11px;color:var(--txs);letter-spacing:.04em;margin-bottom:6px}
-  .kval{font-size:24px;font-weight:500;color:var(--tx);line-height:1.1}
-  .kval.sm{font-size:19px}
-  .ku{font-size:13px;color:var(--txs)}
-  .kdiff{font-size:11px;margin-top:5px;color:var(--txh)}
-
-  /* CHARTS */
-  .crow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-  .ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px}
-  .ctit{font-size:12px;color:var(--txs);font-weight:500;margin-bottom:10px;letter-spacing:.03em}
-  .cleg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
-  .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txs)}
-  .ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-
-  /* TABLE */
-  .tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
-  .thead2{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-  table{width:100%;border-collapse:collapse}
-  th{text-align:left;padding:8px 10px;font-size:11px;color:var(--txs);font-weight:500;letter-spacing:.04em;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
-  th.r{text-align:right}
-  th .arr{font-size:9px;margin-left:3px;opacity:.5}
-  th.sort-asc .arr::after{content:'▲'}
-  th.sort-desc .arr::after{content:'▼'}
-  th:not(.sort-asc):not(.sort-desc) .arr::after{content:'⇅'}
-  td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--tx)}
-  td.r{text-align:right;white-space:nowrap}
-  td.tr{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  tr:last-child td{border-bottom:none}
-  tr:hover td{background:var(--blush-light)}
-
-  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
-  .bi{background:#ede8f8;color:#4a3d89}
-  .bk{background:#e2f5ee;color:#0a5c42}
-  .rb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
-  .rb.hi{background:#eaf3de;color:#3B6D11}
-  .rb.md{background:#faeeda;color:#854F0B}
-  .rb.lo{background:#fcebeb;color:#A32D2D}
-
-  .ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .swrap{position:relative}
-  .sinp{padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:var(--fj);background:var(--bg);color:var(--tx);outline:none;width:210px;transition:border-color .15s}
-  .sinp:focus{border-color:var(--plum)}
-  .sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txh);pointer-events:none}
-  .mtog{display:flex;gap:6px;align-items:center}
-  .mtog label{font-size:11px;color:var(--txs);display:flex;align-items:center;gap:3px;cursor:pointer}
-  .mtog input[type=radio]{accent-color:var(--plum);cursor:pointer}
-  .cnt2{font-size:11px;color:var(--txh);white-space:nowrap}
-  .frow{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
-  .fbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs);transition:all .15s}
-  .fbtn.on{background:var(--plum);color:#f5e8e1;border-color:var(--plum)}
-  .mb16{margin-bottom:16px}
-
-  /* BARS */
-  .scomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-  .scrd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
-  .scrd-ttl{font-size:11px;color:var(--txs);margin-bottom:12px;font-weight:500;letter-spacing:.04em}
-  .bar-wrap{display:flex;flex-direction:column;gap:8px}
-  .bar-row{display:flex;align-items:center;gap:8px}
-  .bar-lbl{font-size:11px;color:var(--txs);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .bar-bg{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden}
-  .bar-fill{height:100%;border-radius:4px;transition:width .3s}
-  .bar-val{font-size:11px;color:var(--tx);white-space:nowrap;min-width:80px;text-align:right}
-  .rate-cell{font-size:11px;color:var(--txs)}
+:root{
+  --plum:#5C3D52;--plum-dark:#3d2638;--plum-light:#7a5569;
+  --blush:#E8C4B8;--blush-light:#f5e8e1;--gold:#C8A882;
+  --bg:#f7f4f2;--card:#ffffff;--border:rgba(92,61,82,0.12);
+  --tx:#2a1f25;--txs:#7a6470;--txh:#b0a0aa;
+  --up:#3B6D11;--dn:#A32D2D;
+  --fb:'Cormorant Garamond',Georgia,serif;
+  --fj:'Zen Kaku Gothic New',-apple-system,sans-serif;
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5}
+#pw{position:fixed;inset:0;background:var(--plum-dark);display:flex;align-items:center;justify-content:center;z-index:1000}
+.pwb{background:var(--card);border-radius:14px;padding:40px 44px;text-align:center;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+.pwb .logo{font-family:var(--fb);font-size:26px;color:var(--plum);margin-bottom:4px}
+.pwb .sub{font-size:12px;color:var(--txs);margin-bottom:28px;letter-spacing:.05em}
+.pwb input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--fj);font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px;transition:border-color .15s}
+.pwb input:focus{border-color:var(--plum)}
+.pwb button{width:100%;padding:11px;background:var(--plum);color:#f5e8e1;border:none;border-radius:var(--rs);font-family:var(--fj);font-size:14px;font-weight:500;cursor:pointer}
+#main{display:none;min-height:100vh}
+.hdr{background:var(--plum);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.hdr-l{display:flex;align-items:baseline;gap:10px}
+.brand{font-family:var(--fb);font-size:20px;color:var(--blush-light);letter-spacing:.04em}
+.tag{font-size:11px;color:var(--blush);opacity:.7;letter-spacing:.06em}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.upd{font-size:11px;color:var(--blush);opacity:.65}
+.pgrp{display:flex;gap:4px}
+.pbtn{background:transparent;border:1px solid rgba(232,196,184,.3);color:var(--blush);font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:var(--fj);transition:all .15s}
+.pbtn.on{background:rgba(232,196,184,.18);border-color:var(--blush)}
+.cmp-sep{color:rgba(232,196,184,.4);font-size:14px;padding:0 2px}
+.tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;padding:0 24px}
+.tab{padding:13px 18px;font-size:13px;color:var(--txs);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab.on{color:var(--plum);border-bottom-color:var(--plum);font-weight:500}
+.cnt{padding:20px 24px;max-width:1380px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+.loading{display:flex;align-items:center;justify-content:center;height:160px;color:var(--txs);font-size:13px;gap:10px}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--plum);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.klbl{font-size:11px;color:var(--txs);letter-spacing:.04em;margin-bottom:6px}
+.kval{font-size:24px;font-weight:500;color:var(--tx);line-height:1.1}
+.kval.sm{font-size:19px}
+.ku{font-size:13px;color:var(--txs)}
+.kdiff{font-size:11px;margin-top:5px;color:var(--txh)}
+.kcmp{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.kcmp .up{color:var(--up)}.kcmp .dn{color:var(--dn)}.kcmp .neu{color:var(--txh)}
+.ai-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:16px;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--plum),var(--gold))}
+.ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-title{font-size:13px;font-weight:500;color:var(--plum)}
+.ai-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.ai-score{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ai-overall{font-size:20px;font-weight:500;color:var(--tx)}
+.ai-meter{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.ai-meter-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.ai-num{font-size:12px;color:var(--txs);white-space:nowrap}
+.ai-points{display:flex;flex-direction:column;gap:8px}
+.ai-point{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--tx);line-height:1.5}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--txs);font-size:12px;padding:8px 0}
+.ai-error{font-size:12px;color:var(--dn)}
+.ai-refresh{background:none;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--txs);padding:3px 10px;cursor:pointer;font-family:var(--fj);transition:all .15s}
+.ai-refresh:hover{border-color:var(--plum);color:var(--plum)}
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.crow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.ctit{font-size:12px;color:var(--txs);font-weight:500;margin-bottom:10px;letter-spacing:.03em}
+.cleg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txs)}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.thead2{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:8px 10px;font-size:11px;color:var(--txs);font-weight:500;letter-spacing:.04em;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th.r{text-align:right}
+th .arr{font-size:9px;margin-left:3px;opacity:.5}
+th.sort-asc .arr::after{content:'▲'}
+th.sort-desc .arr::after{content:'▼'}
+th:not(.sort-asc):not(.sort-desc) .arr::after{content:'⇅'}
+td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--tx)}
+td.r{text-align:right;white-space:nowrap}
+td.tr{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.sku{font-size:11px;color:var(--txs);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--blush-light)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.bi{background:#ede8f8;color:#4a3d89}.bk{background:#e2f5ee;color:#0a5c42}
+.rb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
+.rb.hi{background:#eaf3de;color:#3B6D11}.rb.md{background:#faeeda;color:#854F0B}.rb.lo{background:#fcebeb;color:#A32D2D}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.swrap{position:relative}
+.sinp{padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:var(--fj);background:var(--bg);color:var(--tx);outline:none;width:220px;transition:border-color .15s}
+.sinp:focus{border-color:var(--plum)}
+.sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txh);pointer-events:none}
+.mtog{display:flex;gap:6px;align-items:center}
+.mtog label{font-size:11px;color:var(--txs);display:flex;align-items:center;gap:3px;cursor:pointer}
+.mtog input[type=radio]{accent-color:var(--plum);cursor:pointer}
+.cnt2{font-size:11px;color:var(--txh);white-space:nowrap}
+.frow{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.fbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs);transition:all .15s}
+.fbtn.on{background:var(--plum);color:#f5e8e1;border-color:var(--plum)}
+.mb16{margin-bottom:16px}
+.scomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.scrd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.scrd-ttl{font-size:11px;color:var(--txs);margin-bottom:12px;font-weight:500;letter-spacing:.04em}
+.bar-wrap{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:11px;color:var(--txs);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-bg{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.bar-val{font-size:11px;color:var(--tx);white-space:nowrap;min-width:80px;text-align:right}
+.rate-cell{font-size:11px;color:var(--txs)}
+.cmp-lbl{font-size:11px;color:var(--txs);margin-bottom:8px;letter-spacing:.04em}
 </style>
 </head>
 <body>
 
 <div id="pw">
-  <div class="pwb">
-    <div class="logo">tu-hacci</div>
-    <div class="sub">Yahoo! 広告ダッシュボード</div>
-    <input type="password" id="pwi" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')chkPw()">
-    <button onclick="chkPw()">ログイン</button>
-    <div style="color:#A32D2D;font-size:12px;margin-top:8px;display:none" id="pwerr">パスワードが正しくありません</div>
-  </div>
+<div class="pwb">
+  <div class="logo">tu-hacci</div>
+  <div class="sub">Yahoo! 広告ダッシュボード</div>
+  <input type="password" id="pwi" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')chkPw()">
+  <button onclick="chkPw()">ログイン</button>
+  <div style="color:#A32D2D;font-size:12px;margin-top:8px;display:none" id="pwerr">パスワードが正しくありません</div>
+</div>
 </div>
 
 <div id="main">
-  <div class="hdr">
-    <div class="hdr-l">
-      <span class="brand">tu-hacci</span>
-      <span class="tag">YAHOO! 広告ダッシュボード</span>
-    </div>
-    <div class="hdr-r">
-      <span class="upd" id="upd-lbl">読み込み中...</span>
-      <div class="pgrp">
-        <button class="pbtn on" onclick="setPrd(this,'now')">今月</button>
-        <button class="pbtn" onclick="setPrd(this,'last')">先月</button>
-        <button class="pbtn" onclick="setPrd(this,'before')">先々月</button>
-      </div>
-    </div>
+<div class="hdr">
+  <div class="hdr-l">
+    <span class="brand">tu-hacci</span>
+    <span class="tag">YAHOO! 広告ダッシュボード</span>
   </div>
-
-  <div class="tabs">
-    <div class="tab on" onclick="setTab(0)">サマリー</div>
-    <div class="tab" onclick="setTab(1)">アイテムマッチ</div>
-    <div class="tab" onclick="setTab(2)">キーワード広告</div>
-  </div>
-
-  <div class="cnt">
-
-    <!-- TAB0 SUMMARY -->
-    <div id="t0" class="panel on">
-      <div class="kgrid">
-        <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="k0">—</div><div class="kdiff" id="k0d"></div></div>
-        <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="k1">—</div><div class="kdiff" id="k1d"></div></div>
-        <div class="kcard"><div class="klbl">広告経由売上</div><div class="kval sm" id="k2">—</div><div class="kdiff" id="k2d"></div></div>
-        <div class="kcard"><div class="klbl">CV数</div><div class="kval" id="k3">—</div><div class="kdiff" id="k3d"></div></div>
-        <div class="kcard"><div class="klbl">クリック数</div><div class="kval" id="k4">—</div><div class="kdiff" id="k4d"></div></div>
-        <div class="kcard"><div class="klbl">CPC</div><div class="kval" id="k5">—</div><div class="kdiff" id="k5d"></div></div>
-        <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="k6">—</div><div class="kdiff" id="k6d"></div></div>
-        <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="k7">—</div><div class="kdiff" id="k7d"></div></div>
-      </div>
-      <div class="scomp">
-        <div class="scrd"><div class="scrd-ttl">売上構成</div><div class="bar-wrap" id="bar-sales"></div></div>
-        <div class="scrd"><div class="scrd-ttl">広告費構成</div><div class="bar-wrap" id="bar-spend"></div></div>
-        <div class="scrd"><div class="scrd-ttl">ROAS比較</div><div class="bar-wrap" id="bar-roas"></div></div>
-      </div>
-      <div class="crow">
-        <div class="ccard" style="margin-bottom:0">
-          <div class="ctit">日別 広告費 × 売上</div>
-          <div class="cleg">
-            <div class="li"><div class="ld" style="background:#5C3D52"></div>広告費</div>
-            <div class="li"><div class="ld" style="background:#C8A882"></div>売上</div>
-          </div>
-          <div style="position:relative;height:200px"><canvas id="css"></canvas></div>
-        </div>
-        <div class="ccard" style="margin-bottom:0">
-          <div class="ctit">キャンペーン別 広告費構成</div>
-          <div class="cleg" id="pieleg"></div>
-          <div style="position:relative;height:200px"><canvas id="cpie"></canvas></div>
-        </div>
-      </div>
-      <div class="tcard">
-        <div class="thead2"><div class="ctit" style="margin:0">キャンペーン別パフォーマンス</div></div>
-        <div id="ts-wrap"><div class="loading"><div class="spinner"></div>データを取得中...</div></div>
-      </div>
+  <div class="hdr-r">
+    <span class="upd" id="upd-lbl">読み込み中...</span>
+    <div class="pgrp" id="pgrp-main">
+      <button class="pbtn on" onclick="setPrd(this,'now')">今月</button>
+      <button class="pbtn" onclick="setPrd(this,'last')">先月</button>
+      <button class="pbtn" onclick="setPrd(this,'before')">先々月</button>
     </div>
-
-    <!-- TAB1 ITEM -->
-    <div id="t1" class="panel">
-      <div class="frow">
-        <span style="font-size:12px;color:var(--txs)">キャンペーン：</span>
-        <button class="fbtn on" onclick="setIF(this,'all')">すべて</button>
-        <button class="fbtn" onclick="setIF(this,'z')">全商品広告2</button>
-        <button class="fbtn" onclick="setIF(this,'s')">商品広告2</button>
-      </div>
-      <div class="tcard">
-        <div class="thead2">
-          <div class="ctit" style="margin:0">商品別パフォーマンス（広告費順）</div>
-          <div class="ctrl">
-            <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="isrch" type="text" placeholder="商品名で絞り込み" oninput="renderItems()"></div>
-            <div class="mtog">
-              <label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label>
-              <label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label>
-            </div>
-            <span class="cnt2" id="icnt"></span>
-          </div>
-        </div>
-        <div id="ti-wrap"><div class="loading"><div class="spinner"></div>データを取得中...</div></div>
-      </div>
+    <span class="cmp-sep">｜</span>
+    <span style="font-size:11px;color:var(--blush);opacity:.7">比較:</span>
+    <div class="pgrp" id="pgrp-cmp">
+      <button class="pbtn on" onclick="setCmp(this,'none')">なし</button>
+      <button class="pbtn" onclick="setCmp(this,'last')">先月</button>
+      <button class="pbtn" onclick="setCmp(this,'before')">先々月</button>
     </div>
-
-    <!-- TAB2 KW -->
-    <div id="t2" class="panel">
-      <div class="ccard">
-        <div class="ctit">KWグループ別 広告費</div>
-        <div style="position:relative;height:160px"><canvas id="ckwb"></canvas></div>
-      </div>
-      <div class="tcard mb16">
-        <div class="thead2">
-          <div class="ctit" style="margin:0">KWグループ別パフォーマンス</div>
-          <div class="ctrl">
-            <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="gsrch" type="text" placeholder="グループ名" oninput="renderGrp()"></div>
-            <div class="mtog">
-              <label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label>
-              <label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label>
-            </div>
-          </div>
-        </div>
-        <div id="tg-wrap"><div class="loading"><div class="spinner"></div>データを取得中...</div></div>
-      </div>
-      <div class="tcard">
-        <div class="thead2">
-          <div class="ctit" style="margin:0">検索キーワード × 商品別</div>
-          <div class="ctrl">
-            <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="ksrch" type="text" placeholder="KW・商品名・グループ" oninput="renderKw()"></div>
-            <div class="mtog">
-              <label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label>
-              <label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label>
-            </div>
-            <span class="cnt2" id="kcnt"></span>
-          </div>
-        </div>
-        <div id="tk-wrap"><div class="loading"><div class="spinner"></div>データを取得中...</div></div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<script>
-// ===== API =====
-const API = '/api/data';
-let currentPeriod = 'now';
-let _cache = {};
+<div class="tabs">
+  <div class="tab on" onclick="setTab(0)">サマリー</div>
+  <div class="tab" onclick="setTab(1)">アイテムマッチ</div>
+  <div class="tab" onclick="setTab(2)">キーワード広告</div>
+</div>
 
-async function fetchData(type) {
-  const key = `${type}_${currentPeriod}`;
-  if (_cache[key]) return _cache[key];
-  const res = await fetch(`${API}?type=${type}&period=${currentPeriod}`);
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error);
-  _cache[key] = json.data || [];
+<div class="cnt">
+
+<!-- TAB0 SUMMARY -->
+<div id="t0" class="panel on">
+  <div class="ai-card">
+    <div class="ai-hdr">
+      <span class="ai-title">✦ AI広告分析</span>
+      <span class="ai-badge" style="background:var(--blush-light);color:var(--plum)">Gemini 1.5 Flash</span>
+      <span style="flex:1"></span>
+      <button class="ai-refresh" onclick="runAI()">↻ 再分析</button>
+    </div>
+    <div id="ai-body"><div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div></div>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="k0">—</div><div class="kcmp" id="k0c"></div></div>
+    <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="k1">—</div><div class="kcmp" id="k1c"></div></div>
+    <div class="kcard"><div class="klbl">広告経由売上</div><div class="kval sm" id="k2">—</div><div class="kcmp" id="k2c"></div></div>
+    <div class="kcard"><div class="klbl">CV数</div><div class="kval" id="k3">—</div><div class="kcmp" id="k3c"></div></div>
+    <div class="kcard"><div class="klbl">クリック数</div><div class="kval" id="k4">—</div><div class="kdiff" id="k4d"></div></div>
+    <div class="kcard"><div class="klbl">CPC</div><div class="kval" id="k5">—</div><div class="kcmp" id="k5c"></div></div>
+    <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="k6">—</div><div class="kdiff" id="k6d"></div></div>
+    <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="k7">—</div><div class="kdiff" id="k7d"></div></div>
+  </div>
+
+  <div id="cmp-kpi-block" style="display:none">
+    <div class="cmp-lbl">▸ 比較期間</div>
+    <div class="kgrid" style="opacity:.75">
+      <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="ck0">—</div></div>
+      <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="ck1">—</div></div>
+      <div class="kcard"><div class="klbl">広告経由売上</div><div class="kval sm" id="ck2">—</div></div>
+      <div class="kcard"><div class="klbl">CV数</div><div class="kval" id="ck3">—</div></div>
+      <div class="kcard"><div class="klbl">クリック数</div><div class="kval" id="ck4">—</div></div>
+      <div class="kcard"><div class="klbl">CPC</div><div class="kval" id="ck5">—</div></div>
+      <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="ck6">—</div></div>
+      <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="ck7">—</div></div>
+    </div>
+  </div>
+
+  <div class="scomp">
+    <div class="scrd"><div class="scrd-ttl">売上構成</div><div class="bar-wrap" id="bar-sales"></div></div>
+    <div class="scrd"><div class="scrd-ttl">広告費構成</div><div class="bar-wrap" id="bar-spend"></div></div>
+    <div class="scrd"><div class="scrd-ttl">ROAS比較</div><div class="bar-wrap" id="bar-roas"></div></div>
+  </div>
+
+  <div class="crow">
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">日別 広告費 × 売上</div>
+      <div class="cleg">
+        <div class="li"><div class="ld" style="background:#5C3D52"></div>広告費</div>
+        <div class="li"><div class="ld" style="background:#C8A882"></div>売上</div>
+      </div>
+      <div style="position:relative;height:200px"><canvas id="css"></canvas></div>
+    </div>
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">キャンペーン別 広告費構成</div>
+      <div class="cleg" id="pieleg"></div>
+      <div style="position:relative;height:200px"><canvas id="cpie"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="thead2"><div class="ctit" style="margin:0">キャンペーン別パフォーマンス</div></div>
+    <div id="ts-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+</div>
+
+<!-- TAB1 ITEM MATCH -->
+<div id="t1" class="panel">
+  <div class="crow">
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">品番別 広告費構成 TOP10</div>
+      <div style="position:relative;height:220px"><canvas id="sku-pie"></canvas></div>
+    </div>
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">キャンペーン別 売上構成</div>
+      <div style="position:relative;height:220px"><canvas id="camp-pie"></canvas></div>
+    </div>
+  </div>
+  <div class="frow">
+    <span style="font-size:12px;color:var(--txs)">キャンペーン：</span>
+    <button class="fbtn on" onclick="setIF(this,'all')">すべて</button>
+    <button class="fbtn" onclick="setIF(this,'z')">全商品広告2</button>
+    <button class="fbtn" onclick="setIF(this,'s')">商品広告2</button>
+  </div>
+  <div class="tcard">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">商品別パフォーマンス</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="isrch" type="text" placeholder="商品名・品番で絞り込み" oninput="renderItems()"></div>
+        <div class="mtog">
+          <label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label>
+          <label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label>
+        </div>
+        <span class="cnt2" id="icnt"></span>
+      </div>
+    </div>
+    <div id="ti-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+</div>
+
+<!-- TAB2 KW -->
+<div id="t2" class="panel">
+  <div class="crow3">
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">グループ別 広告費</div>
+      <div style="position:relative;height:200px"><canvas id="kw-grp-pie"></canvas></div>
+    </div>
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">品番別 広告費</div>
+      <div style="position:relative;height:200px"><canvas id="kw-sku-pie"></canvas></div>
+    </div>
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">検索KW別 広告費 TOP10</div>
+      <div style="position:relative;height:200px"><canvas id="kw-kw-pie"></canvas></div>
+    </div>
+  </div>
+  <div class="tcard mb16">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">KWグループ別パフォーマンス</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="gsrch" type="text" placeholder="グループ名" oninput="renderGrp()"></div>
+        <div class="mtog">
+          <label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label>
+          <label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label>
+        </div>
+      </div>
+    </div>
+    <div id="tg-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+  <div class="tcard">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">検索キーワード × 商品別</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="ksrch" type="text" placeholder="KW・商品名・品番・グループ" oninput="renderKw()"></div>
+        <div class="mtog">
+          <label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label>
+          <label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label>
+        </div>
+        <span class="cnt2" id="kcnt"></span>
+      </div>
+    </div>
+    <div id="tk-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+const API='/api/data';
+let currentPeriod='now',cmpPeriod='none';
+let _cache={};
+
+async function fetchData(type,period){
+  const p=period||currentPeriod;
+  const key=`${type}_${p}`;
+  if(_cache[key])return _cache[key];
+  const res=await fetch(`${API}?type=${type}&period=${p}`);
+  const json=await res.json();
+  if(!json.ok)throw new Error(json.error);
+  _cache[key]=json.data||[];
   return _cache[key];
 }
 
-// ===== STATE =====
-let CAMP = [], ITEMS = [], KW_GRP = [], KW_DET = [], DAILY = [];
-let KPI = {};
-const COLORS = ['#5C3D52','#C8A882','#8a6478'];
+let CAMP=[],ITEMS=[],KW_GRP=[],KW_DET=[],DAILY=[],SKU_DATA=[],KW_SKU=[],KW_KW=[];
+let KPI={},CMP_KPI={};
+const COLORS=['#5C3D52','#C8A882','#8a6478','#a08595','#d4b8ae','#6e4d62','#b89caa','#c4a882','#7a5569','#e2c4b0'];
+const fmt=n=>Math.round(n||0).toLocaleString('ja-JP');
+const roasClass=r=>r>=600?'hi':r>=300?'md':'lo';
+const acos=(s,a)=>a>0?((s/a)*100).toFixed(1)+'%':'—';
+const prdLabel={now:'今月',last:'先月',before:'先々月'};
 
-const fmt = n => Math.round(n||0).toLocaleString('ja-JP');
-const roasClass = r => r>=600?'hi':r>=300?'md':'lo';
-const acos = (s,a) => a>0?((s/a)*100).toFixed(1)+'%':'—';
-
-// ===== PW =====
 function chkPw(){
   if(document.getElementById('pwi').value==='yahoohamadanobiru28'){
     document.getElementById('pw').style.display='none';
     document.getElementById('main').style.display='block';
-    loadAll();
-  } else {
+    loadAll();runAI();
+  }else{
     document.getElementById('pwerr').style.display='block';
     document.getElementById('pwi').value='';
   }
 }
 
-// ===== TAB =====
 function setTab(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',i===j));
 }
 
-// ===== PERIOD =====
-function setPrd(el, key){
-  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-  currentPeriod = key;
-  _cache = {};
-  loadAll();
+function setPrd(el,key){
+  document.querySelectorAll('#pgrp-main .pbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');currentPeriod=key;_cache={};loadAll();runAI();
 }
 
-// ===== LOAD ALL =====
+function setCmp(el,key){
+  document.querySelectorAll('#pgrp-cmp .pbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');cmpPeriod=key;
+  if(key==='none'){document.getElementById('cmp-kpi-block').style.display='none';}
+  else loadCmp();
+}
+
 async function loadAll(){
-  try {
-    const [summary, kwSummary, daily, items, kwGroups, kwDetail] = await Promise.all([
-      fetchData('summary'),
-      fetchData('kw_summary'),
-      fetchData('daily'),
-      fetchData('items'),
-      fetchData('kw_groups'),
-      fetchData('kw_detail'),
+  try{
+    document.getElementById('upd-lbl').textContent='読み込み中...';
+    const [summary,kwSummary,daily,items,kwGroups,kwDetail,skuData,kwSku,kwKw]=await Promise.all([
+      fetchData('summary'),fetchData('kw_summary'),fetchData('daily'),fetchData('items'),
+      fetchData('kw_groups'),fetchData('kw_detail'),fetchData('items_sku'),fetchData('kw_sku'),fetchData('kw_keywords'),
     ]);
-
-    CAMP = [
-      ...summary.map(r=>({...r, campaign_name: r.campaign_name, type:'item'})),
-      ...kwSummary.map(r=>({...r, type:'kw'})),
-    ];
-
-    const totalSpend = CAMP.reduce((a,c)=>a+(c.spend||0),0);
-    const totalSales = CAMP.reduce((a,c)=>a+(c.sales||0),0);
-    const totalCv    = CAMP.reduce((a,c)=>a+(c.cv||0),0);
-    const totalClicks= CAMP.reduce((a,c)=>a+(c.clicks||0),0);
-    const totalImps  = CAMP.reduce((a,c)=>a+(c.imps||0),0);
-    KPI = {
-      spend: totalSpend, sales: totalSales, cv: totalCv,
-      clicks: totalClicks, imps: totalImps,
-      roas: totalSales>0?Math.round(totalSales/totalSpend*100):0,
-      cpc: totalClicks>0?Math.round(totalSpend/totalClicks):0,
-    };
-
-    DAILY = daily;
-    ITEMS = items.map(r=>({
-      name: r.item_name, camp: r.campaign_name,
-      spend: r.spend, sales: r.sales,
-      roas: Math.round(r.roas||0), cv: r.cv,
-      cpc: Math.round(r.cpc||0),
-    }));
-    KW_GRP = kwGroups.map(r=>({
-      name: r.ad_group_name, spend: r.spend, sales: r.sales,
-      roas: Math.round(r.roas||0), cv: r.cv,
-      cpc: Math.round(r.cpc||0), clicks: r.clicks,
-    }));
-    KW_DET = kwDetail.map(r=>({
-      grp: r.grp, kw: r.kw, item: r.item,
-      spend: r.spend, sales: r.sales,
-      roas: Math.round(r.roas||0), cv: r.cv, imps: r.imps,
-    }));
-
-    // 期間ラベル更新
-    const prdLabel = {now:'今月', last:'先月', before:'先々月'};
-    document.getElementById('upd-lbl').textContent = `${prdLabel[currentPeriod]}のデータ`;
-
-    renderKPI();
-    renderBars();
-    renderSummaryTable();
-    renderCharts();
-    renderItems();
-    renderGrp();
-    renderKw();
-    if(KW_GRP.length>0) buildKwChart();
-
-  } catch(e) {
+    CAMP=[...summary.map(r=>({...r,type:'item'})),...kwSummary.map(r=>({...r,type:'kw'}))];
+    const ts=CAMP.reduce((a,c)=>a+(c.spend||0),0);
+    const tsa=CAMP.reduce((a,c)=>a+(c.sales||0),0);
+    const tcv=CAMP.reduce((a,c)=>a+(c.cv||0),0);
+    const tcl=CAMP.reduce((a,c)=>a+(c.clicks||0),0);
+    const tim=CAMP.reduce((a,c)=>a+(c.imps||0),0);
+    KPI={spend:ts,sales:tsa,cv:tcv,clicks:tcl,imps:tim,
+      roas:tsa>0?Math.round(tsa/ts*100):0,cpc:tcl>0?Math.round(ts/tcl):0};
+    DAILY=daily;
+    ITEMS=items.map(r=>({ysrid:r.ysrid||'',name:r.item_name||'',camp:r.campaign_name,
+      spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks||0}));
+    KW_GRP=kwGroups.map(r=>({name:r.ad_group_name,spend:r.spend,sales:r.sales,
+      roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks}));
+    KW_DET=kwDetail.map(r=>({grp:r.grp,kw:r.kw,ysrid:r.ysrid||'',item:r.item,
+      spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,imps:r.imps}));
+    SKU_DATA=skuData;KW_SKU=kwSku;KW_KW=kwKw;
+    document.getElementById('upd-lbl').textContent=prdLabel[currentPeriod]+'のデータ';
+    renderKPI();renderBars();renderSummaryTable();renderCharts();
+    renderItems();renderGrp();renderKw();renderPieCharts();
+    if(cmpPeriod!=='none')loadCmp();
+  }catch(e){
     console.error(e);
-    document.getElementById('upd-lbl').textContent = 'エラー: '+e.message;
+    document.getElementById('upd-lbl').textContent='エラー: '+e.message;
   }
 }
 
-// ===== KPI =====
+async function loadCmp(){
+  if(cmpPeriod==='none')return;
+  try{
+    const[s,ks]=await Promise.all([fetchData('summary',cmpPeriod),fetchData('kw_summary',cmpPeriod)]);
+    const all=[...s,...ks];
+    const sp=all.reduce((a,c)=>a+(c.spend||0),0);
+    const sa=all.reduce((a,c)=>a+(c.sales||0),0);
+    const cv=all.reduce((a,c)=>a+(c.cv||0),0);
+    const cl=all.reduce((a,c)=>a+(c.clicks||0),0);
+    const im=all.reduce((a,c)=>a+(c.imps||0),0);
+    CMP_KPI={spend:sp,sales:sa,cv,clicks:cl,imps:im,
+      roas:sa>0?Math.round(sa/sp*100):0,cpc:cl>0?Math.round(sp/cl):0};
+    document.getElementById('cmp-kpi-block').style.display='block';
+    renderCmpKPI();renderKPI();
+  }catch(e){console.error(e);}
+}
+
+function renderCmpKPI(){
+  const d=CMP_KPI;
+  document.getElementById('ck0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
+  document.getElementById('ck1').textContent='¥'+fmt(d.spend);
+  document.getElementById('ck2').textContent='¥'+fmt(d.sales);
+  document.getElementById('ck3').textContent=fmt(d.cv);
+  document.getElementById('ck4').textContent=fmt(d.clicks);
+  document.getElementById('ck5').textContent='¥'+fmt(d.cpc);
+  document.getElementById('ck6').textContent=fmt(d.imps);
+  document.getElementById('ck7').textContent=d.sales>0?((d.spend/d.sales)*100).toFixed(1)+'%':'—';
+}
+
+function diffHtml(cur,prev,isLower){
+  if(!prev||prev===0)return '';
+  const diff=cur-prev,pct=Math.round(diff/prev*100);
+  const up=isLower?diff<0:diff>0;
+  const cl=diff===0?'neu':up?'up':'dn';
+  return `<span class="${cl}">${diff>0?'▲':'▼'}${Math.abs(pct)}% (${diff>0?'+':''}${fmt(diff)})</span>`;
+}
+
 function renderKPI(){
-  const d = KPI;
-  document.getElementById('k0').innerHTML = fmt(d.roas)+'<span class="ku">%</span>';
-  document.getElementById('k1').textContent = '¥'+fmt(d.spend);
-  document.getElementById('k2').textContent = '¥'+fmt(d.sales);
-  document.getElementById('k3').textContent = fmt(d.cv);
-  document.getElementById('k4').textContent = fmt(d.clicks);
-  document.getElementById('k5').textContent = '¥'+fmt(d.cpc);
-  document.getElementById('k6').textContent = fmt(d.imps);
-  const acos_pct = d.sales>0?((d.spend/d.sales)*100).toFixed(1):0;
-  document.getElementById('k7').textContent = acos_pct+'%';
-  document.getElementById('k7d').textContent = '¥'+fmt(d.spend);
-  document.getElementById('k4d').textContent = 'CVR '+(d.clicks>0?((d.cv/d.clicks)*100).toFixed(1):0)+'%';
-  document.getElementById('k6d').textContent = 'CTR '+(d.imps>0?((d.clicks/d.imps)*100).toFixed(2):0)+'%';
+  const d=KPI;
+  document.getElementById('k0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
+  document.getElementById('k1').textContent='¥'+fmt(d.spend);
+  document.getElementById('k2').textContent='¥'+fmt(d.sales);
+  document.getElementById('k3').textContent=fmt(d.cv);
+  document.getElementById('k4').textContent=fmt(d.clicks);
+  document.getElementById('k5').textContent='¥'+fmt(d.cpc);
+  document.getElementById('k6').textContent=fmt(d.imps);
+  const ap=d.sales>0?((d.spend/d.sales)*100).toFixed(1):0;
+  document.getElementById('k7').textContent=ap+'%';
+  document.getElementById('k7d').textContent='¥'+fmt(d.spend);
+  document.getElementById('k4d').textContent='CVR '+(d.clicks>0?((d.cv/d.clicks)*100).toFixed(1):0)+'%';
+  document.getElementById('k6d').textContent='CTR '+(d.imps>0?((d.clicks/d.imps)*100).toFixed(2):0)+'%';
+  if(cmpPeriod!=='none'&&CMP_KPI.spend){
+    document.getElementById('k0c').innerHTML=diffHtml(d.roas,CMP_KPI.roas,false);
+    document.getElementById('k1c').innerHTML=diffHtml(d.spend,CMP_KPI.spend,true);
+    document.getElementById('k2c').innerHTML=diffHtml(d.sales,CMP_KPI.sales,false);
+    document.getElementById('k3c').innerHTML=diffHtml(d.cv,CMP_KPI.cv,false);
+    document.getElementById('k5c').innerHTML=diffHtml(d.cpc,CMP_KPI.cpc,true);
+  }
 }
 
-// ===== BARS =====
 function renderBars(){
-  const ts = CAMP.reduce((a,c)=>a+(c.sales||0),0);
-  const tsp = CAMP.reduce((a,c)=>a+(c.spend||0),0);
-  const mr = Math.max(...CAMP.map(c=>c.roas||0));
-
-  document.getElementById('bar-sales').innerHTML = CAMP.map((c,i)=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${c.campaign_name}</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${ts>0?(c.sales/ts*100).toFixed(1):0}%;background:${COLORS[i%3]}"></div></div>
-      <div class="bar-val">¥${fmt(c.sales)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${ts>0?(c.sales/ts*100).toFixed(1):0}%</span></div>
-    </div>`).join('');
-
-  document.getElementById('bar-spend').innerHTML = CAMP.map((c,i)=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${c.campaign_name}</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${tsp>0?(c.spend/tsp*100).toFixed(1):0}%;background:${COLORS[i%3]}"></div></div>
-      <div class="bar-val">¥${fmt(c.spend)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${tsp>0?(c.spend/tsp*100).toFixed(1):0}%</span></div>
-    </div>`).join('');
-
-  document.getElementById('bar-roas').innerHTML = CAMP.map((c,i)=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${c.campaign_name}</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${mr>0?((c.roas||0)/mr*100).toFixed(1):0}%;background:${COLORS[i%3]}"></div></div>
-      <div class="bar-val"><span class="rb ${roasClass(c.roas||0)}">${fmt(c.roas||0)}%</span></div>
-    </div>`).join('');
+  const ts=CAMP.reduce((a,c)=>a+(c.sales||0),0);
+  const tsp=CAMP.reduce((a,c)=>a+(c.spend||0),0);
+  const mr=Math.max(...CAMP.map(c=>c.roas||0));
+  document.getElementById('bar-sales').innerHTML=CAMP.map((c,i)=>`
+    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${ts>0?(c.sales/ts*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
+    <div class="bar-val">¥${fmt(c.sales)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${ts>0?(c.sales/ts*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-spend').innerHTML=CAMP.map((c,i)=>`
+    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${tsp>0?(c.spend/tsp*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
+    <div class="bar-val">¥${fmt(c.spend)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${tsp>0?(c.spend/tsp*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-roas').innerHTML=CAMP.map((c,i)=>`
+    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${mr>0?((c.roas||0)/mr*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
+    <div class="bar-val"><span class="rb ${roasClass(c.roas||0)}">${fmt(c.roas||0)}%</span></div></div>`).join('');
 }
 
-// ===== SUMMARY TABLE =====
 function renderSummaryTable(){
-  document.getElementById('ts-wrap').innerHTML = `
-    <table>
-      <thead><tr>
-        <th>キャンペーン</th>
-        <th class="r">広告費</th><th class="r">売上</th><th class="r">ROAS</th>
-        <th class="r">広告費率</th><th class="r">CV数</th><th class="r">CPC</th><th class="r">クリック</th>
-      </tr></thead>
-      <tbody>${CAMP.map(r=>`
-        <tr>
-          <td><span class="badge ${r.type==='kw'?'bk':'bi'}">${r.campaign_name}</span></td>
-          <td class="r">¥${fmt(r.spend)}</td>
-          <td class="r">¥${fmt(r.sales)}</td>
-          <td class="r"><span class="rb ${roasClass(r.roas||0)}">${fmt(r.roas||0)}%</span></td>
-          <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-          <td class="r">${fmt(r.cv)}</td>
-          <td class="r">¥${fmt(r.cpc)}</td>
-          <td class="r">${fmt(r.clicks)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+  document.getElementById('ts-wrap').innerHTML=`
+    <table><thead><tr>
+      <th>キャンペーン</th><th class="r">広告費</th><th class="r">売上</th><th class="r">ROAS</th>
+      <th class="r">広告費率</th><th class="r">CV数</th><th class="r">CPC</th><th class="r">クリック</th>
+    </tr></thead><tbody>${CAMP.map(r=>`
+      <tr><td><span class="badge ${r.type==='kw'?'bk':'bi'}">${r.campaign_name}</span></td>
+      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
+      <td class="r"><span class="rb ${roasClass(r.roas||0)}">${fmt(r.roas||0)}%</span></td>
+      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
+      <td class="r">${fmt(r.cv)}</td><td class="r">¥${fmt(r.cpc)}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 
-// ===== CHARTS =====
-let _charts = {};
-function renderCharts(){
-  const labels = DAILY.map(r=>{const d=new Date(r.date);return `${d.getMonth()+1}/${d.getDate()}`;});
-  const s15 = DAILY.map(r=>Math.round(r.spend||0));
-  const a15 = DAILY.map(r=>Math.round(r.sales||0));
+let _charts={};
+function dc(id){if(_charts[id]){_charts[id].destroy();delete _charts[id];}}
 
-  if(_charts.ss) _charts.ss.destroy();
-  _charts.ss = new Chart(document.getElementById('css'),{
+function renderCharts(){
+  const labels=DAILY.map(r=>{const d=new Date(r.date);return `${d.getMonth()+1}/${d.getDate()}`;});
+  dc('ss');
+  _charts.ss=new Chart(document.getElementById('css'),{
     data:{labels,datasets:[
-      {type:'bar',data:s15,backgroundColor:'#5C3D52',yAxisID:'y'},
-      {type:'line',data:a15,borderColor:'#C8A882',backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2,yAxisID:'y2'}
+      {type:'bar',data:DAILY.map(r=>Math.round(r.spend||0)),backgroundColor:'#5C3D52',yAxisID:'y'},
+      {type:'line',data:DAILY.map(r=>Math.round(r.sales||0)),borderColor:'#C8A882',backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2,yAxisID:'y2'}
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},
-              y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},
-              x:{ticks:{font:{size:10},maxRotation:0}}}}
+        y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},
+        x:{ticks:{font:{size:10},maxRotation:0}}}}
   });
-
-  document.getElementById('pieleg').innerHTML = CAMP.map((c,i)=>
-    `<div class="li"><div class="ld" style="background:${COLORS[i%3]}"></div>${c.campaign_name}</div>`
-  ).join('');
-  if(_charts.pie) _charts.pie.destroy();
-  _charts.pie = new Chart(document.getElementById('cpie'),{
+  document.getElementById('pieleg').innerHTML=CAMP.map((c,i)=>`<div class="li"><div class="ld" style="background:${COLORS[i%10]}"></div>${c.campaign_name}</div>`).join('');
+  dc('pie');
+  _charts.pie=new Chart(document.getElementById('cpie'),{
     type:'doughnut',
     data:{labels:CAMP.map(c=>c.campaign_name),datasets:[{data:CAMP.map(c=>c.spend||0),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}（${KPI.spend>0?Math.round(c.raw/KPI.spend*100):0}%）`}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}（${KPI.spend>0?Math.round(c.raw/KPI.spend*100):0}%）`}}}}
   });
 }
 
-// ===== ITEMS =====
+function makePie(id,labels,data){
+  dc(id);
+  if(!data||data.length===0)return;
+  _charts[id]=new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:5}},
+        tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}`}}}}
+  });
+}
+
+function renderPieCharts(){
+  makePie('sku-pie',SKU_DATA.map(r=>r.ysrid||'不明'),SKU_DATA.map(r=>r.spend||0));
+  const ic=CAMP.filter(c=>c.type==='item');
+  makePie('camp-pie',ic.map(c=>c.campaign_name),ic.map(c=>c.sales||0));
+  makePie('kw-grp-pie',KW_GRP.slice(0,10).map(r=>r.name),KW_GRP.slice(0,10).map(r=>r.spend||0));
+  makePie('kw-sku-pie',KW_SKU.map(r=>r.ysrid||'不明'),KW_SKU.map(r=>r.spend||0));
+  makePie('kw-kw-pie',KW_KW.slice(0,10).map(r=>r.kw),KW_KW.slice(0,10).map(r=>r.spend||0));
+}
+
 let iFilter='all';
-const sortState={};
 function setIF(el,k){document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');iFilter=k;renderItems();}
 function renderItems(sort){
   const q=(document.getElementById('isrch').value||'').toLowerCase();
@@ -484,41 +546,36 @@ function renderItems(sort){
     if(iFilter==='z'&&r.camp!=='全商品広告2')return false;
     if(iFilter==='s'&&r.camp!=='商品広告2')return false;
     if(!q)return true;
-    return mode==='exact'?r.name.toLowerCase()===q:r.name.toLowerCase().includes(q);
+    return mode==='exact'?[r.name,r.ysrid].some(s=>(s||'').toLowerCase()===q):[r.name,r.ysrid].some(s=>(s||'').toLowerCase().includes(q));
   });
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('icnt').textContent=f.length+'件';
   document.getElementById('ti-wrap').innerHTML=`
-    <table>
-      <thead><tr>
-        <th style="width:28px">#</th>
-        <th onclick="sortTable('items','name',this)">商品名<span class="arr"></span></th>
-        <th onclick="sortTable('items','camp',this)">キャンペーン<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('items','spend',this)">広告費<span class="arr sort-desc"></span></th>
-        <th class="r" onclick="sortTable('items','sales',this)">売上<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('items','roas',this)">ROAS<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('items','acos',this)">広告費率<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('items','cv',this)">CV<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('items','cpc',this)">CPC<span class="arr"></span></th>
-      </tr></thead>
-      <tbody>${f.map((r,i)=>`
-        <tr>
-          <td style="color:var(--txh);font-size:11px">${i+1}</td>
-          <td class="tr">${r.name}</td>
-          <td><span class="badge bi">${r.camp}</span></td>
-          <td class="r">¥${fmt(r.spend)}</td>
-          <td class="r">¥${fmt(r.sales)}</td>
-          <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-          <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-          <td class="r">${r.cv}</td>
-          <td class="r">¥${r.cpc}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+    <table><thead><tr>
+      <th style="width:28px">#</th>
+      <th onclick="sortTable('items','ysrid',this)">品番<span class="arr"></span></th>
+      <th onclick="sortTable('items','name',this)">商品名<span class="arr"></span></th>
+      <th onclick="sortTable('items','camp',this)">キャンペーン<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('items','spend',this)">広告費<span class="arr sort-desc"></span></th>
+      <th class="r" onclick="sortTable('items','sales',this)">売上<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('items','roas',this)">ROAS<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('items','acos',this)">広告費率<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('items','cv',this)">CV<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('items','cpc',this)">CPC<span class="arr"></span></th>
+    </tr></thead>
+    <tbody>${f.map((r,i)=>`
+      <tr><td style="color:var(--txh);font-size:11px">${i+1}</td>
+      <td class="sku">${r.ysrid||'—'}</td>
+      <td class="tr">${r.name}</td>
+      <td><span class="badge bi">${r.camp}</span></td>
+      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
+      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
+      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
+      <td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 
-// ===== KW GRP =====
 function renderGrp(sort){
   const q=(document.getElementById('gsrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=gm]:checked').value;
@@ -526,94 +583,98 @@ function renderGrp(sort){
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('tg-wrap').innerHTML=`
-    <table>
-      <thead><tr>
-        <th onclick="sortTable('grp','name',this)">グループ<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','spend',this)">広告費<span class="arr sort-desc"></span></th>
-        <th class="r" onclick="sortTable('grp','sales',this)">売上<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','roas',this)">ROAS<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','acos',this)">広告費率<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','cv',this)">CV<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','cpc',this)">CPC<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('grp','clicks',this)">クリック<span class="arr"></span></th>
-      </tr></thead>
-      <tbody>${f.map(r=>`
-        <tr>
-          <td>${r.name}</td>
-          <td class="r">¥${fmt(r.spend)}</td>
-          <td class="r">¥${fmt(r.sales)}</td>
-          <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-          <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-          <td class="r">${r.cv}</td>
-          <td class="r">¥${r.cpc}</td>
-          <td class="r">${fmt(r.clicks)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+    <table><thead><tr>
+      <th onclick="sortTable('grp','name',this)">グループ<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','spend',this)">広告費<span class="arr sort-desc"></span></th>
+      <th class="r" onclick="sortTable('grp','sales',this)">売上<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','roas',this)">ROAS<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','acos',this)">広告費率<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','cv',this)">CV<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','cpc',this)">CPC<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('grp','clicks',this)">クリック<span class="arr"></span></th>
+    </tr></thead>
+    <tbody>${f.map(r=>`
+      <tr><td>${r.name}</td>
+      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
+      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
+      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
+      <td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 
-// ===== KW DETAIL =====
 function renderKw(sort){
   const q=(document.getElementById('ksrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=km]:checked').value;
   let f=KW_DET.filter(r=>{
     if(!q)return true;
-    const targets=[r.kw,r.item,r.grp].map(s=>(s||'').toLowerCase());
-    return mode==='exact'?targets.some(s=>s===q):targets.some(s=>s.includes(q));
+    const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());
+    return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));
   });
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('kcnt').textContent=f.length+'件';
   document.getElementById('tk-wrap').innerHTML=`
-    <table>
-      <thead><tr>
-        <th onclick="sortTable('kw','grp',this)">グループ<span class="arr"></span></th>
-        <th onclick="sortTable('kw','kw',this)">検索キーワード<span class="arr"></span></th>
-        <th onclick="sortTable('kw','item',this)">商品名<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('kw','spend',this)">広告費<span class="arr sort-desc"></span></th>
-        <th class="r" onclick="sortTable('kw','sales',this)">売上<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('kw','roas',this)">ROAS<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('kw','acos',this)">広告費率<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('kw','cv',this)">CV<span class="arr"></span></th>
-        <th class="r" onclick="sortTable('kw','imps',this)">インプレ<span class="arr"></span></th>
-      </tr></thead>
-      <tbody>${f.map(r=>`
-        <tr>
-          <td><span class="badge bk">${r.grp||''}</span></td>
-          <td class="tr" style="max-width:150px">${r.kw||''}</td>
-          <td class="tr">${r.item||''}</td>
-          <td class="r">¥${fmt(r.spend)}</td>
-          <td class="r">¥${fmt(r.sales)}</td>
-          <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-          <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-          <td class="r">${r.cv}</td>
-          <td class="r">${fmt(r.imps)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+    <table><thead><tr>
+      <th onclick="sortTable('kw','grp',this)">グループ<span class="arr"></span></th>
+      <th onclick="sortTable('kw','kw',this)">検索KW<span class="arr"></span></th>
+      <th onclick="sortTable('kw','ysrid',this)">品番<span class="arr"></span></th>
+      <th onclick="sortTable('kw','item',this)">商品名<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('kw','spend',this)">広告費<span class="arr sort-desc"></span></th>
+      <th class="r" onclick="sortTable('kw','sales',this)">売上<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('kw','roas',this)">ROAS<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('kw','acos',this)">広告費率<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('kw','cv',this)">CV<span class="arr"></span></th>
+      <th class="r" onclick="sortTable('kw','imps',this)">インプレ<span class="arr"></span></th>
+    </tr></thead>
+    <tbody>${f.map(r=>`
+      <tr><td><span class="badge bk">${r.grp||''}</span></td>
+      <td class="tr" style="max-width:130px">${r.kw||''}</td>
+      <td class="sku">${r.ysrid||'—'}</td>
+      <td class="tr">${r.item||''}</td>
+      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
+      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
+      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
+      <td class="r">${r.cv}</td><td class="r">${fmt(r.imps)}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 
-// ===== KW CHART =====
-function buildKwChart(){
-  const sorted=[...KW_GRP].sort((a,b)=>b.spend-a.spend);
-  if(_charts.kw) _charts.kw.destroy();
-  _charts.kw = new Chart(document.getElementById('ckwb'),{
-    type:'bar',
-    data:{labels:sorted.map(r=>r.name),datasets:[{data:sorted.map(r=>r.spend),backgroundColor:'#5C3D52'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'¥'+v}}}}
-  });
+async function runAI(){
+  const body=document.getElementById('ai-body');
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div>';
+  try{
+    const res=await fetch(`${API}?type=ai_analysis&period=${currentPeriod}`);
+    const json=await res.json();
+    if(!json.ok)throw new Error(json.error);
+    const d=json.data;
+    const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
+    const im={good:'✓',bad:'⚠',action:'→'};
+    const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
+    const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
+    body.innerHTML=`
+      <div class="ai-score">
+        <div class="ai-overall">${d.overall||''}</div>
+        <div class="ai-meter"><div class="ai-meter-fill" style="width:${d.score||50}%;background:${sc}"></div></div>
+        <div class="ai-num">${d.score||50}/100</div>
+      </div>
+      <div class="ai-points">${(d.points||[]).map(p=>`
+        <div class="ai-point">
+          <span style="background:${bg[p.type]||'#f0f0f0'};color:${cl[p.type]||'#333'};padding:2px 6px;border-radius:4px;font-size:11px;flex-shrink:0">${im[p.type]||'•'}</span>
+          <span>${p.text}</span>
+        </div>`).join('')}
+      </div>`;
+  }catch(e){
+    body.innerHTML=`<div class="ai-error">分析エラー: ${e.message}</div>`;
+  }
 }
 
-// ===== SORT =====
 const _sortState={};
-function sortTable(tbl, key, th){
+function sortTable(tbl,key,th){
   const prev=_sortState[tbl]||{};
   const dir=prev.key===key?(prev.dir==='asc'?'desc':'asc'):'desc';
   _sortState[tbl]={key,dir};
-  if(tbl==='items') renderItems({key,dir});
-  if(tbl==='grp')   renderGrp({key,dir});
-  if(tbl==='kw')    renderKw({key,dir});
+  if(tbl==='items')renderItems({key,dir});
+  if(tbl==='grp')renderGrp({key,dir});
+  if(tbl==='kw')renderKw({key,dir});
 }
 </script>
 </body>
