@@ -640,12 +640,25 @@ function renderKw(sort){
 
 async function runAI(){
   const body=document.getElementById('ai-body');
+  const geminiKey=localStorage.getItem('gemini_api_key')||'';
+  if(!geminiKey){
+    body.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;color:var(--txs)">Gemini APIキー:</span><input id="gkey-inp" type="password" placeholder="AIzaSy..." style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:260px;font-family:var(--fj)"><button onclick="saveGeminiKey()" style="padding:6px 12px;background:var(--plum);color:#f5e8e1;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--fj)">設定して分析</button></div>';
+    return;
+  }
   body.innerHTML='<div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div>';
   try{
-    const res=await fetch(`${API}?type=ai_analysis&period=${currentPeriod}`);
-    const json=await res.json();
-    if(!json.ok)throw new Error(json.error);
-    const d=json.data;
+    const [s,ks]=await Promise.all([
+      fetchData('summary','now'),fetchData('summary','last'),fetchData('summary','before'),
+      fetchData('kw_summary','now'),fetchData('kw_summary','last'),fetchData('kw_summary','before'),
+    ]);
+    const bq=await fetch(`${API}?type=summary&period=now`);
+    const prompt=`あなたはEC広告の専門アナリストです。tu-hacci（女性向けランジェリーブランド）のYahoo!広告データを分析してください。\n\n【今月のアイテムマッチ】\n${JSON.stringify(CAMP)}\n\n以下の観点で日本語で分析してください（400〜500文字）:\n1.今月の評価（良い点・悪い点）\n2.特に注目すべきキャンペーン・グループ\n3.原因の仮説\n4.具体的なアクション提案2〜3個\n\n回答はJSONのみ返してください:\n{"overall":"総合評価15文字以内","score":数値0〜100,"points":[{"type":"good"|"bad"|"action","text":"内容"}]}`;
+    const gres=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
+    const gjson=await gres.json();
+    if(gjson.error)throw new Error(gjson.error.message);
+    const rawText=gjson.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    let d;
+    try{d=JSON.parse(rawText.replace(/```json|```/g,'').trim());}catch{d={overall:'分析完了',score:50,points:[{type:'good',text:rawText.slice(0,200)}]};}
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
     const im={good:'✓',bad:'⚠',action:'→'};
     const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};

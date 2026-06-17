@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     const bq = getClient();
     let query = '';
 
-    if (type === 'ai_analysis') {
+    if (type === 'ai_analysis_disabled') {
       const aiQuery = `
         SELECT
           DATE_TRUNC(date, MONTH) AS month,
