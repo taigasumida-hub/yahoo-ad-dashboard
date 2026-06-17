@@ -1,125 +1,66 @@
-import { BigQuery } from "@google-cloud/bigquery";
+﻿const { BigQuery } = require('@google-cloud/bigquery');
 
-const bigquery = new BigQuery({
-  projectId: "tu-hacci-ad",
-  credentials: JSON.parse(process.env.GCP_KEY),
-});
+const getClient = () => {
+  const keyJson = JSON.parse(process.env.GCP_KEY);
+  return new BigQuery({ projectId: 'tu-hacci-ad', credentials: keyJson });
+};
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  if (req.method === "OPTIONS") return res.status(200).end();
+const PROJECT = 'tu-hacci-ad';
+const DATASET = 'yahoo_ads';
 
-  const { type, since, until } = req.query;
+const getPeriodFilter = (period) => {
+  switch (period) {
+    case 'last':   return DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 1 MONTH), MONTH);
+    case 'before': return DATE_TRUNC(date, MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('Asia/Tokyo'), INTERVAL 2 MONTH), MONTH);
+    default:       return DATE_TRUNC(date, MONTH) = DATE_TRUNC(CURRENT_DATE('Asia/Tokyo'), MONTH);
+  }
+};
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const { type = 'summary', period = 'now' } = req.query;
+  const periodFilter = getPeriodFilter(period);
 
   try {
-    let query = "";
+    const bq = getClient();
+    let query = '';
 
-    if (type === "summary") {
-      // サマリー：キャンペーン別集計
-      query = `
-        SELECT
-          campaign_name,
-          SUM(imps) as imps,
-          SUM(clicks) as clicks,
-          SUM(use_amount) as cost,
-          SUM(order_count) as orders,
-          SUM(gmv) as sales,
-          SAFE_DIVIDE(SUM(gmv), SUM(use_amount)) * 100 as roas,
-          SAFE_DIVIDE(SUM(clicks), SUM(imps)) * 100 as ctr,
-          SAFE_DIVIDE(SUM(order_count), SUM(clicks)) * 100 as cvr,
-          SAFE_DIVIDE(SUM(use_amount), SUM(clicks)) as cpc
-        FROM \`tu-hacci-ad.yahoo_ads.item_daily\`
-        WHERE date BETWEEN '${since}' AND '${until}'
-        GROUP BY campaign_name
-        ORDER BY cost DESC
-      `;
-    } else if (type === "daily") {
-      // 日別推移
-      query = `
-        SELECT
-          date,
-          SUM(imps) as imps,
-          SUM(clicks) as clicks,
-          SUM(use_amount) as cost,
-          SUM(order_count) as orders,
-          SUM(gmv) as sales,
-          SAFE_DIVIDE(SUM(gmv), SUM(use_amount)) * 100 as roas
-        FROM \`tu-hacci-ad.yahoo_ads.item_daily\`
-        WHERE date BETWEEN '${since}' AND '${until}'
-        GROUP BY date
-        ORDER BY date ASC
-      `;
-    } else if (type === "items") {
-      // 商品別ランキング
-      query = `
-        SELECT
-          ysrid,
-          item_name,
-          campaign_name,
-          SUM(imps) as imps,
-          SUM(clicks) as clicks,
-          SUM(use_amount) as cost,
-          SUM(order_count) as orders,
-          SUM(gmv) as sales,
-          SAFE_DIVIDE(SUM(gmv), SUM(use_amount)) * 100 as roas,
-          SAFE_DIVIDE(SUM(order_count), SUM(clicks)) * 100 as cvr
-        FROM \`tu-hacci-ad.yahoo_ads.item_daily\`
-        WHERE date BETWEEN '${since}' AND '${until}'
-          AND use_amount > 0
-        GROUP BY ysrid, item_name, campaign_name
-        ORDER BY cost DESC
-        LIMIT 50
-      `;
-    } else if (type === "keywords") {
-      // KWグループ別集計
-      query = `
-        SELECT
-          ad_group_name,
-          SUM(imps) as imps,
-          SUM(clicks) as clicks,
-          SUM(use_amount) as cost,
-          SUM(order_count) as orders,
-          SUM(gmv) as sales,
-          SAFE_DIVIDE(SUM(gmv), SUM(use_amount)) * 100 as roas,
-          SAFE_DIVIDE(SUM(order_count), SUM(clicks)) * 100 as cvr
-        FROM \`tu-hacci-ad.yahoo_ads.kw_daily\`
-        WHERE date BETWEEN '${since}' AND '${until}'
-          AND use_amount > 0
-        GROUP BY ad_group_name
-        ORDER BY cost DESC
-      `;
-    } else if (type === "kw_daily") {
-      // KW日別推移
-      query = `
-        SELECT
-          date,
-          SUM(imps) as imps,
-          SUM(clicks) as clicks,
-          SUM(use_amount) as cost,
-          SUM(order_count) as orders,
-          SUM(gmv) as sales,
-          SAFE_DIVIDE(SUM(gmv), SUM(use_amount)) * 100 as roas
-        FROM \`tu-hacci-ad.yahoo_ads.kw_daily\`
-        WHERE date BETWEEN '${since}' AND '${until}'
-        GROUP BY date
-        ORDER BY date ASC
-      `;
-    } else {
-      return res.status(400).json({ error: "Invalid type" });
+    switch (type) {
+      case 'summary':
+        query = SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..item_daily\ WHERE  GROUP BY campaign_name ORDER BY spend DESC;
+        break;
+      case 'kw_summary':
+        query = SELECT campaign_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..kw_daily\ WHERE  GROUP BY campaign_name;
+        break;
+      case 'daily':
+        query = SELECT date, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \${PROJECT}..item_daily\ WHERE  GROUP BY date ORDER BY date ASC;
+        break;
+      case 'items':
+        query = SELECT campaign_name, ysrid, item_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..item_daily\ WHERE  AND item_name IS NOT NULL AND item_name != '' GROUP BY campaign_name, ysrid, item_name ORDER BY spend DESC LIMIT 50;
+        break;
+      case 'kw_groups':
+        query = SELECT ad_group_name, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(clicks) AS clicks, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas, SAFE_DIVIDE(SUM(use_amount),SUM(clicks)) AS cpc FROM \${PROJECT}..kw_daily\ WHERE  GROUP BY ad_group_name ORDER BY spend DESC;
+        break;
+      case 'kw_detail':
+        query = SELECT ad_group_name AS grp, search_keyword AS kw, item_name AS item, SUM(use_amount) AS spend, SUM(gmv) AS sales, SUM(order_count) AS cv, SUM(imps) AS imps, SAFE_DIVIDE(SUM(gmv),SUM(use_amount))*100 AS roas FROM \${PROJECT}..kw_daily\ WHERE  AND search_keyword IS NOT NULL AND search_keyword != '' GROUP BY grp, kw, item ORDER BY spend DESC LIMIT 100;
+        break;
+      default:
+        return res.status(400).json({ ok: false, error: 'Invalid type' });
     }
 
-    const [rows] = await bigquery.query(query);
-    const serialized = rows.map((row) => {
-      const r = {};
-      for (const [k, v] of Object.entries(row)) {
-        r[k] = v && typeof v === "object" && v.value !== undefined ? v.value : v;
-      }
+    const [rows] = await bq.query({ query, location: 'US' });
+    const data = rows.map(row => {
+      const r = { ...row };
+      if (r.date && r.date.value) r.date = r.date.value;
+      ['spend','sales','roas','cpc'].forEach(k => { if (r[k] != null) r[k] = Math.round(r[k]*100)/100; });
       return r;
     });
-    res.status(200).json(serialized);
+    res.status(200).json({ ok: true, data });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ ok: false, error: err.message });
   }
-}
+};
