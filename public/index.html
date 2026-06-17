@@ -455,15 +455,15 @@ function renderKw(sort){
   document.getElementById('tk-wrap').innerHTML=`<table><thead><tr><th onclick="sortT('kw','grp',this)">グループ<span class="arr"></span></th><th onclick="sortT('kw','kw',this)">検索KW<span class="arr"></span></th><th onclick="sortT('kw','ysrid',this)">品番<span class="arr"></span></th><th onclick="sortT('kw','item',this)">商品名<span class="arr"></span></th><th class="r" onclick="sortT('kw','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('kw','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('kw','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('kw','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('kw','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('kw','imps',this)">インプレ<span class="arr"></span></th></tr></thead><tbody>${f.map(r=>`<tr><td><span class="badge bk">${r.grp||''}</span></td><td class="tr" style="max-width:130px">${r.kw||''}</td><td class="sku">${r.ysrid||'—'}</td><td class="tr">${r.item||''}</td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">${fmt(r.imps)}</td></tr>`).join('')}</tbody></table>`;
 }
 function initAI(){
-  const key=localStorage.getItem('gemini_api_key');
-  const validKey=key&&key.startsWith(" AIzaSy\);if(validKey)runAI(false);else{localStorage.removeItem(\gemini_api_key\);showKeyInput();}
+  runAI(false);
 }
 function showKeyInput(){
-  document.getElementById('ai-body').innerHTML=`<div class="ai-setup"><span>Gemini APIキー:</span><input id="gk" type="password" placeholder="AIzaSy..."><button onclick="saveKey()">設定して分析</button></div>`;
+  document.getElementById('ai-body').innerHTML=`<div class="ai-setup"><span>Gemini APIキー:</span><input id="gk" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other" name="gemini_key_field" placeholder="AIzaSy..."><button onclick="saveKey()">設定して分析</button></div>`;
 }
 function saveKey(){
   const k=(document.getElementById('gk').value||'').trim();
   if(!k)return;
+  if(!k.startsWith('AIzaSy')){alert('Gemini APIキーは「AIzaSy」で始まります。\nパスワードマネージャーがログインパスワードを入れた可能性があります。\n手でキーを貼り直してください。');return;}
   localStorage.setItem('gemini_api_key',k);runAI(false);
 }
 async function runAI_OLD_DISABLED(force){
@@ -504,27 +504,22 @@ ${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0)
   }
 }
 async function runAI(force){
-  const key=localStorage.getItem('gemini_api_key');
-  if(!key){showKeyInput();return;}
   const body=document.getElementById('ai-body');
-  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>分析中...</div>';
+  if(!body)return;
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>AI分析中...</div>';
   try{
-    const prompt='あなたはEC広告アナリストです。tu-hacci Yahoo!広告を分析してください。\n\n'+JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0),sales:Math.round(c.sales||0),roas:Math.round(c.roas||0),cv:c.cv||0})))+'\n\n日本語で分析し、以下JSONのみ返してください:\n{"overall":"15文字以内","score":0から100の数値,"points":[{"type":"good","text":"内容"},{"type":"bad","text":"内容"},{"type":"action","text":"内容"}]}';
-    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
+    const res=await fetch(API+'?type=ai_analysis&period='+period);
     const gj=await res.json();
-    if(gj.error)throw new Error(gj.error.message);
-    const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    if(!raw)throw new Error('空の応答');
-    const m=raw.match(/\{[\s\S]*\}/);
-    if(!m)throw new Error('JSON not found');
-    const d=JSON.parse(m[0]);
+    if(!gj.ok)throw new Error(gj.error||'APIエラー');
+    const d=gj.data;
+    if(!d||typeof d!=='object')throw new Error('分析データが空');
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
-    const im={good:'✓',bad:'⚠',action:'→'};
+    const im={good:'\u2713',bad:'\u26a0',action:'\u2192'};
     const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
     const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
-    body.innerHTML='<div class="ai-score"><div class="ai-overall">'+d.overall+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+d.score+'%;background:'+sc+'"></div></div><div class="ai-num">'+d.score+'/100</div></div><div class="ai-points">'+(d.points||[]).map(p=>'<div class="ai-point"><span class="ai-tag" style="background:'+bg[p.type]+';color:'+cl[p.type]+'">'+im[p.type]+'</span><span>'+p.text+'</span></div>').join('')+'</div>';
+    body.innerHTML='<div class="ai-score"><div class="ai-overall">'+(d.overall||'')+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+(d.score||50)+'%;background:'+sc+'"></div></div><div class="ai-num">'+(d.score||50)+'/100</div></div><div class="ai-points">'+(d.points||[]).map(p=>'<div class="ai-point"><span class="ai-tag" style="background:'+(bg[p.type]||'#f0f0f0')+';color:'+(cl[p.type]||'#333')+'">'+(im[p.type]||'\u2022')+'</span><span>'+(p.text||'')+'</span></div>').join('')+'</div>';
   }catch(e){
-    body.innerHTML='<div class="ai-err">分析エラー: '+e.message+' <button class="ai-refresh" onclick="localStorage.removeItem(\'gemini_api_key\');showKeyInput()">キーを再設定</button></div>';
+    body.innerHTML='<div class="ai-err">\u5206\u6790\u30a8\u30e9\u30fc: '+e.message+' <button class="ai-refresh" onclick="runAI(true)">\u518d\u8a66\u884c</button></div>';
   }
 }
 const _ss={};

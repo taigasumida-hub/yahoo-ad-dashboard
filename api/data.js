@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     const bq = getClient();
     let query = '';
 
-    if (type === 'ai_analysis_disabled') {
+    if (type === 'ai_analysis') {
       const aiQuery = `
         SELECT
           DATE_TRUNC(date, MONTH) AS month,
@@ -101,25 +101,44 @@ ${JSON.stringify(fmtRows(kwRows), null, 2)}
 JSONのみ返してください。マークダウンのコードブロックは不要です。
       `;
 
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
-          }),
-        }
-      );
-      const geminiJson = await geminiRes.json();
-      if (geminiJson.error) throw new Error('Gemini API: ' + geminiJson.error.message);
-      const rawText = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text || '{"overall":"データ不足","score":50,"points":[]}';
-      let analysis;
-      try {
-        analysis = JSON.parse(rawText.replace(/```json|```/g, '').trim());
-      } catch(parseErr) {
-        analysis = { overall: 'Gemini応答エラー', score: 50, points: [{ type: 'bad', text: rawText.slice(0,300) }] };
+      if (!geminiKey) throw new Error('GEMINI_API_KEY が未設定です');
+
+      // モデルフォールバック: 上から順に試し、最初に応答したものを使う
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      let rawText = '';
+      let lastErr = '';
+      for (const model of models) {
+        try {
+          const gRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
+              }),
+            }
+          );
+          const gJson = await gRes.json();
+          if (gJson.error) { lastErr = gJson.error.message; continue; }
+          const t = gJson.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (t) { rawText = t; break; }
+          lastErr = '空の応答';
+        } catch (e) { lastErr = e.message; }
+      }
+      if (!rawText) throw new Error('Gemini API: ' + (lastErr || '全モデルで失敗'));
+
+      // JSON抽出を3段構えで鉄壁化（素のparse → コードブロック除去 → {...}抽出）
+      const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };
+      let analysis = tryParse(rawText.trim())
+        || tryParse(rawText.replace(/```json|```/g, '').trim());
+      if (!analysis) {
+        const m = rawText.match(/\{[\s\S]*\}/);
+        if (m) analysis = tryParse(m[0]);
+      }
+      if (!analysis) {
+        analysis = { overall: 'Gemini応答エラー', score: 50, points: [{ type: 'bad', text: rawText.slice(0, 300) }] };
       }
       return res.status(200).json({ ok: true, data: analysis });
     }
