@@ -503,6 +503,30 @@ ${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0)
     body.innerHTML=`<div class="ai-err">分析エラー: ${e.message} <button class="ai-refresh" onclick="localStorage.removeItem('gemini_api_key');showKeyInput()">キーを再設定</button></div>`;
   }
 }
+async function runAI(force){
+  const key=localStorage.getItem('gemini_api_key');
+  if(!key){showKeyInput();return;}
+  const body=document.getElementById('ai-body');
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>分析中...</div>';
+  try{
+    const prompt='あなたはEC広告アナリストです。tu-hacci Yahoo!広告を分析してください。\n\n'+JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0),sales:Math.round(c.sales||0),roas:Math.round(c.roas||0),cv:c.cv||0})))+'\n\n日本語で分析し、以下JSONのみ返してください:\n{"overall":"15文字以内","score":0から100の数値,"points":[{"type":"good","text":"内容"},{"type":"bad","text":"内容"},{"type":"action","text":"内容"}]}';
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
+    const gj=await res.json();
+    if(gj.error)throw new Error(gj.error.message);
+    const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!raw)throw new Error('空の応答');
+    const m=raw.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('JSON not found');
+    const d=JSON.parse(m[0]);
+    const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
+    const im={good:'✓',bad:'⚠',action:'→'};
+    const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
+    const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
+    body.innerHTML='<div class="ai-score"><div class="ai-overall">'+d.overall+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+d.score+'%;background:'+sc+'"></div></div><div class="ai-num">'+d.score+'/100</div></div><div class="ai-points">'+(d.points||[]).map(p=>'<div class="ai-point"><span class="ai-tag" style="background:'+bg[p.type]+';color:'+cl[p.type]+'">'+im[p.type]+'</span><span>'+p.text+'</span></div>').join('')+'</div>';
+  }catch(e){
+    body.innerHTML='<div class="ai-err">分析エラー: '+e.message+' <button class="ai-refresh" onclick="localStorage.removeItem(\'gemini_api_key\');showKeyInput()">キーを再設定</button></div>';
+  }
+}
 const _ss={};
 function sortT(tbl,key,th){
   const p=_ss[tbl]||{};
