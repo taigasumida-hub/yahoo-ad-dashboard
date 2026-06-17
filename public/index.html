@@ -491,8 +491,9 @@ ${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0)
     const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!raw)throw new Error('Geminiから空の応答が返されました');
     let d;
-    try{d=JSON.parse(raw);}
-    catch{const m=raw.match(/\{[\s\S]*\}/);if(m)d=JSON.parse(m[0]);else throw new Error('JSONの解析に失敗しました');}
+    const cleaned=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    try{d=JSON.parse(cleaned);}
+    catch{const m=cleaned.match(/\{[\s\S]*\}/);if(m)d=JSON.parse(m[0]);else throw new Error('JSONの解析に失敗しました: '+cleaned.slice(0,100));}
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
     const im={good:'✓',bad:'⚠',action:'→'};
     const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
