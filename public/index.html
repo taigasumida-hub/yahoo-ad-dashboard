@@ -485,7 +485,7 @@ ${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0)
 
 必ずJSONのみで返してください。説明文・コードブロック・jsonプレフィックスは不要:
 {"overall":"総合評価15文字以内","score":数値0から100,"points":[{"type":"good","text":"内容"},{"type":"bad","text":"内容"},{"type":"action","text":"内容"}]}`;
-    const res=await fetch(`${GEMINI_URL}?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024,responseMimeType:'application/json'}})});
+    const res=await fetch(`${GEMINI_URL}?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
     const gj=await res.json();
     if(gj.error)throw new Error(gj.error.message);
     const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
