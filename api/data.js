@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
         return res.status(400).json({ ok: false, error: 'Invalid type' });
     }
 
-    const [rows] = await bq.query({ query, location: 'US' });
+    const [rows] = await bq.query({ query, location: 'asia-northeast1' });
     const data = rows.map(row => {
       const r = { ...row };
       if (r.date && r.date.value) r.date = r.date.value;
