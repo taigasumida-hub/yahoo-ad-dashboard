@@ -659,7 +659,7 @@ async function runAI(){
     const rawText=gjson.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
     let d;
     try{
-      const cleaned=rawText.replace(/```json|```/g,'').replace(/^json\s*/,'').trim();
+      const cleaned=rawText.replace(/```json|```/g,'').replace(/^\s*json\s*/i,'').trim();
       d=JSON.parse(cleaned);
     }catch{d={overall:'分析完了',score:50,points:[{type:'good',text:rawText.slice(0,200)}]};}
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
