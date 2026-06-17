@@ -147,17 +147,14 @@ tr:hover td{background:var(--blush-light)}
   </div>
   <div class="hdr-r">
     <span class="upd" id="upd-lbl">読み込み中...</span>
-    <div class="pgrp" id="pg-main">
-      <button class="pbtn on" onclick="setPrd(this,'now')">今月</button>
-      <button class="pbtn" onclick="setPrd(this,'last')">先月</button>
-      <button class="pbtn" onclick="setPrd(this,'before')">先々月</button>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--blush);opacity:.75">対象月</span>
+      <select id="sel-month" onchange="onMonth()" style="font-size:12px;padding:4px 8px;border:1px solid #e3d7de;border-radius:6px;background:#fff;color:#4a3340;cursor:pointer"></select>
     </div>
     <span class="sep">｜</span>
-    <span style="font-size:11px;color:var(--blush);opacity:.7">比較:</span>
-    <div class="pgrp" id="pg-cmp">
-      <button class="pbtn on" onclick="setCmp(this,'none')">なし</button>
-      <button class="pbtn" onclick="setCmp(this,'last')">先月</button>
-      <button class="pbtn" onclick="setCmp(this,'before')">先々月</button>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--blush);opacity:.75">比較月</span>
+      <select id="sel-cmp" onchange="onCmp()" style="font-size:12px;padding:4px 8px;border:1px solid #e3d7de;border-radius:6px;background:#fff;color:#4a3340;cursor:pointer"><option value="none">なし</option></select>
     </div>
   </div>
 </div>
@@ -293,22 +290,36 @@ function chkPw(){
   if(document.getElementById('pwi').value===PW){
     document.getElementById('pw').style.display='none';
     document.getElementById('main').style.display='block';
-    loadAll();
+    boot();
   }else{document.getElementById('pwerr').style.display='block';document.getElementById('pwi').value='';}
 }
 function setTab(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',i===j));
 }
-function setPrd(el,k){
-  document.querySelectorAll('#pg-main .pbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');period=k;_cache={};loadAll();
+function _mlabel(m){return /^\d{4}-\d{2}$/.test(m)?(m.split('-')[0]+'年'+parseInt(m.split('-')[1],10)+'月'):(prdLbl[m]||m);}
+async function boot(){await loadMonths();await loadAll();runAI(false);}
+async function loadMonths(){
+  try{
+    const r=await fetch(API+'?type=months');const j=await r.json();
+    const months=(j.ok&&Array.isArray(j.data)&&j.data.length)?j.data:[];
+    const selM=document.getElementById('sel-month'),selC=document.getElementById('sel-cmp');
+    selM.innerHTML=months.map(m=>'<option value="'+m+'">'+_mlabel(m)+'</option>').join('');
+    selC.innerHTML='<option value="none">なし</option>'+months.map(m=>'<option value="'+m+'">'+_mlabel(m)+'</option>').join('');
+    if(months.length){period=months[0];selM.value=period;}
+    if(months.length>1){cmpPeriod=months[1];selC.value=months[1];}else{cmpPeriod='none';}
+  }catch(e){console.error('months',e);}
 }
-function setCmp(el,k){
-  document.querySelectorAll('#pg-cmp .pbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');cmpPeriod=k;
-  if(k==='none'){document.getElementById('cmp-blk').style.display='none';renderKPI();}
+function _aiStale(){
+  const body=document.getElementById('ai-body');
+  if(body)body.innerHTML='<div style="padding:14px;font-size:12.5px;color:#6a5560">期間が変わりました。<button class="ai-refresh" onclick="runAI(true)" style="margin-left:8px">↻ この期間で分析</button></div>';
+}
+function onMonth(){period=document.getElementById('sel-month').value;_cache={};loadAll();_aiStale();}
+function onCmp(){
+  cmpPeriod=document.getElementById('sel-cmp').value;
+  if(cmpPeriod==='none'){document.getElementById('cmp-blk').style.display='none';renderKPI();}
   else loadCmp();
+  _aiStale();
 }
 async function api(type,p){
   const k=type+'_'+(p||period);
@@ -335,10 +346,9 @@ async function loadAll(){
     KW_GRP=grp.map(r=>({name:r.ad_group_name,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks}));
     KW_DET=det.map(r=>({grp:r.grp,kw:r.kw,ysrid:r.ysrid||'',item:r.item,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,imps:r.imps}));
     SKU_DATA=sku;KW_SKU=ksku;KW_KW=kkw;
-    document.getElementById('upd-lbl').textContent=prdLbl[period]+'のデータ';
+    document.getElementById('upd-lbl').textContent=_mlabel(period)+'のデータ';
     renderAll();
     if(cmpPeriod!=='none')loadCmp();
-    initAI();
   }catch(e){document.getElementById('upd-lbl').textContent='エラー: '+e.message;}
 }
 async function loadCmp(){
@@ -503,35 +513,53 @@ ${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0)
     body.innerHTML=`<div class="ai-err">分析エラー: ${e.message} <button class="ai-refresh" onclick="localStorage.removeItem('gemini_api_key');showKeyInput()">キーを再設定</button></div>`;
   }
 }
-let _aiCache=null;
+let _aiCache={};
 function _renderAI(body,d){
   const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
-  const im={good:'\u2713',bad:'\u26a0',action:'\u2192'};
-  const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
-  const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
-  body.innerHTML='<div class="ai-score"><div class="ai-overall">'+(d.overall||'')+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+(d.score||50)+'%;background:'+sc+'"></div></div><div class="ai-num">'+(d.score||50)+'/100</div></div><div class="ai-points">'+(d.points||[]).map(p=>'<div class="ai-point"><span class="ai-tag" style="background:'+(bg[p.type]||'#f0f0f0')+';color:'+(cl[p.type]||'#333')+'">'+(im[p.type]||'\u2022')+'</span><span>'+(p.text||'')+'</span></div>').join('')+'</div>';
+  const aClr={'強化':['#eaf3de','#3B6D11'],'維持':['#eef0f2','#555'],'抑制':['#fdf1e3','#854F0B'],'削除':['#fcebeb','#A32D2D'],'追加':['#e8f0fb','#1a4db8']};
+  const tag=a=>{const c=aClr[a]||['#f0f0f0','#333'];return '<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:'+c[0]+';color:'+c[1]+';white-space:nowrap">'+(a||'—')+'</span>';};
+  const roasC=r=>r>=600?'#3B6D11':r>=300?'#854F0B':'#A32D2D';
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let h='<div class="ai-score"><div class="ai-overall">'+esc(d.overall)+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+(d.score||50)+'%;background:'+sc+'"></div></div><div class="ai-num">'+(d.score||50)+'/100</div></div>';
+  if(d.summary)h+='<div style="font-size:12.5px;line-height:1.7;color:#4a3340;margin:10px 2px">'+esc(d.summary)+'</div>';
+  if(d.target_roas)h+='<div style="margin:10px 2px;padding:10px 12px;background:#faf4ec;border-left:3px solid #C8A882;border-radius:4px;font-size:12px;line-height:1.6;color:#5a4250"><b>目標ROAS提案</b>　'+esc(d.target_roas)+'</div>';
+  const rows=(arr,kind)=>arr.map(x=>{
+    const label=kind==='item'?((x.ysrid?esc(x.ysrid)+' ':'')+esc(x.name)):('「'+esc(x.kw)+'」'+(x.group?' / '+esc(x.group):''));
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f0e8ec">'
+      +'<div style="flex-shrink:0;width:40px">'+tag(x.action)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#3a2832;display:flex;gap:8px;align-items:center"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span>'+(x.roas?'<span style="flex-shrink:0;font-size:11px;color:'+roasC(x.roas)+'">ROAS '+x.roas+'%</span>':'')+'</div>'
+      +'<div style="font-size:11.5px;color:#6a5560;line-height:1.5;margin-top:2px">'+esc(x.root)+'</div></div></div>';
+  }).join('');
+  const items=Array.isArray(d.items)?d.items:[],kws=Array.isArray(d.keywords)?d.keywords:[];
+  if(items.length)h+='<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:#5C3D52;margin-bottom:2px">アイテムマッチ：品番別アクション</div>'+rows(items,'item')+'</div>';
+  if(kws.length)h+='<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:#5C3D52;margin-bottom:2px">キーワード広告：KW別アクション</div>'+rows(kws,'kw')+'</div>';
+  if(!items.length&&!kws.length&&!d.summary)h+='<div class="ai-err">'+esc(d.overall||'分析結果が空です')+'</div>';
+  body.innerHTML=h;
 }
 async function runAI(force){
   const body=document.getElementById('ai-body');
   if(!body)return;
-  if(_aiCache&&!force){_renderAI(body,_aiCache);return;}
-  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>AI\u5206\u6790\u4e2d...</div>';
+  const ck=period+'|'+cmpPeriod;
+  if(_aiCache[ck]&&!force){_renderAI(body,_aiCache[ck]);return;}
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>AI分析中（品番別・KW別）...</div>';
   try{
-    const res=await fetch(API+'?type=ai_analysis');
+    let u=API+'?type=ai_analysis&period='+encodeURIComponent(period);
+    if(cmpPeriod&&cmpPeriod!=='none')u+='&compare='+encodeURIComponent(cmpPeriod);
+    const res=await fetch(u);
     const gj=await res.json();
     if(!gj.ok){
       const er=String(gj.error||'');
       const msg=/quota|exceeded|rate/i.test(er)
-        ? 'Gemini\u306e\u7121\u6599\u67a0\u306e\u4e0a\u9650\u306b\u9054\u3057\u307e\u3057\u305f\u3002\u6570\u5206\u5f85\u3063\u3066\u300c\u518d\u5206\u6790\u300d\u3092\u62bc\u3059\u304b\u3001API\u30ad\u30fc\u306b\u8ab2\u91d1\u3092\u6709\u52b9\u5316\u3057\u3066\u304f\u3060\u3055\u3044\u3002'
-        : (er||'API\u30a8\u30e9\u30fc');
+        ? 'Geminiの無料枠の上限に達しました。数分待って「再分析」を押すか、APIキーに課金を有効化してください。'
+        : (er||'APIエラー');
       throw new Error(msg);
     }
     const d=gj.data;
-    if(!d||typeof d!=='object')throw new Error('\u5206\u6790\u30c7\u30fc\u30bf\u304c\u7a7a');
-    _aiCache=d;
+    if(!d||typeof d!=='object')throw new Error('分析データが空');
+    _aiCache[ck]=d;
     _renderAI(body,d);
   }catch(e){
-    body.innerHTML='<div class="ai-err">\u5206\u6790\u30a8\u30e9\u30fc: '+e.message+' <button class="ai-refresh" onclick="runAI(true)">\u518d\u8a66\u884c</button></div>';
+    body.innerHTML='<div class="ai-err">分析エラー: '+e.message+' <button class="ai-refresh" onclick="runAI(true)">再試行</button></div>';
   }
 }
 const _ss={};
