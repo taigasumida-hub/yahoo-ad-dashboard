@@ -658,7 +658,10 @@ async function runAI(){
     if(gjson.error)throw new Error(gjson.error.message);
     const rawText=gjson.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
     let d;
-    try{d=JSON.parse(rawText.replace(/```json|```/g,'').trim());}catch{d={overall:'分析完了',score:50,points:[{type:'good',text:rawText.slice(0,200)}]};}
+    try{
+      const cleaned=rawText.replace(/```json|```/g,'').replace(/^json\s*/,'').trim();
+      d=JSON.parse(cleaned);
+    }catch{d={overall:'分析完了',score:50,points:[{type:'good',text:rawText.slice(0,200)}]};}
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
     const im={good:'✓',bad:'⚠',action:'→'};
     const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
