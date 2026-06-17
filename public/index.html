@@ -680,6 +680,10 @@ async function runAI(){
   }
 }
 
+function saveGeminiKey(){
+  const k=document.getElementById('gkey-inp').value.trim();
+  if(k){localStorage.setItem('gemini_api_key',k);runAI();}
+}
 const _sortState={};
 function sortTable(tbl,key,th){
   const prev=_sortState[tbl]||{};
