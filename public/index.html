@@ -293,7 +293,7 @@ function chkPw(){
   if(document.getElementById('pwi').value===PW){
     document.getElementById('pw').style.display='none';
     document.getElementById('main').style.display='block';
-    loadAll();initAI();
+    loadAll();
   }else{document.getElementById('pwerr').style.display='block';document.getElementById('pwi').value='';}
 }
 function setTab(i){
@@ -338,6 +338,7 @@ async function loadAll(){
     document.getElementById('upd-lbl').textContent=prdLbl[period]+'のデータ';
     renderAll();
     if(cmpPeriod!=='none')loadCmp();
+    initAI();
   }catch(e){document.getElementById('upd-lbl').textContent='エラー: '+e.message;}
 }
 async function loadCmp(){
