@@ -456,7 +456,7 @@ function renderKw(sort){
 }
 function initAI(){
   const key=localStorage.getItem('gemini_api_key');
-  if(key)runAI(false);else showKeyInput();
+  const validKey=key&&key.startsWith(" AIzaSy\);if(validKey)runAI(false);else{localStorage.removeItem(\gemini_api_key\);showKeyInput();}
 }
 function showKeyInput(){
   document.getElementById('ai-body').innerHTML=`<div class="ai-setup"><span>Gemini APIキー:</span><input id="gk" type="password" placeholder="AIzaSy..."><button onclick="saveKey()">設定して分析</button></div>`;
