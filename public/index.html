@@ -466,7 +466,7 @@ function saveKey(){
   if(!k)return;
   localStorage.setItem('gemini_api_key',k);runAI(false);
 }
-async function runAI(force){
+async function runAI_OLD_DISABLED(force){
   const key=localStorage.getItem('gemini_api_key');
   if(!key){showKeyInput();return;}
   const body=document.getElementById('ai-body');
