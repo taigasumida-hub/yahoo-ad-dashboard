@@ -11,7 +11,7 @@
 :root{
   --plum:#5C3D52;--plum-dark:#3d2638;--plum-light:#7a5569;
   --blush:#E8C4B8;--blush-light:#f5e8e1;--gold:#C8A882;
-  --bg:#f7f4f2;--card:#ffffff;--border:rgba(92,61,82,0.12);
+  --bg:#f7f4f2;--card:#fff;--border:rgba(92,61,82,0.12);
   --tx:#2a1f25;--txs:#7a6470;--txh:#b0a0aa;
   --up:#3B6D11;--dn:#A32D2D;
   --fb:'Cormorant Garamond',Georgia,serif;
@@ -21,23 +21,23 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5}
 #pw{position:fixed;inset:0;background:var(--plum-dark);display:flex;align-items:center;justify-content:center;z-index:1000}
-.pwb{background:var(--card);border-radius:14px;padding:40px 44px;text-align:center;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+.pwb{background:var(--card);border-radius:14px;padding:40px 44px;text-align:center;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
 .pwb .logo{font-family:var(--fb);font-size:26px;color:var(--plum);margin-bottom:4px}
 .pwb .sub{font-size:12px;color:var(--txs);margin-bottom:28px;letter-spacing:.05em}
-.pwb input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--fj);font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px;transition:border-color .15s}
+.pwb input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--fj);font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px}
 .pwb input:focus{border-color:var(--plum)}
-.pwb button{width:100%;padding:11px;background:var(--plum);color:#f5e8e1;border:none;border-radius:var(--rs);font-family:var(--fj);font-size:14px;font-weight:500;cursor:pointer}
+.pwb button{width:100%;padding:11px;background:var(--plum);color:#f5e8e1;border:none;border-radius:var(--rs);font-family:var(--fj);font-size:14px;cursor:pointer}
 #main{display:none;min-height:100vh}
 .hdr{background:var(--plum);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
 .hdr-l{display:flex;align-items:baseline;gap:10px}
 .brand{font-family:var(--fb);font-size:20px;color:var(--blush-light);letter-spacing:.04em}
 .tag{font-size:11px;color:var(--blush);opacity:.7;letter-spacing:.06em}
-.hdr-r{display:flex;align-items:center;gap:12px}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .upd{font-size:11px;color:var(--blush);opacity:.65}
 .pgrp{display:flex;gap:4px}
 .pbtn{background:transparent;border:1px solid rgba(232,196,184,.3);color:var(--blush);font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:var(--fj);transition:all .15s}
 .pbtn.on{background:rgba(232,196,184,.18);border-color:var(--blush)}
-.cmp-sep{color:rgba(232,196,184,.4);font-size:14px;padding:0 2px}
+.sep{color:rgba(232,196,184,.4);font-size:14px}
 .tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;padding:0 24px}
 .tab{padding:13px 18px;font-size:13px;color:var(--txs);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
 .tab.on{color:var(--plum);border-bottom-color:var(--plum);font-weight:500}
@@ -53,23 +53,29 @@ body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;l
 .kval.sm{font-size:19px}
 .ku{font-size:13px;color:var(--txs)}
 .kdiff{font-size:11px;margin-top:5px;color:var(--txh)}
-.kcmp{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.kcmp{font-size:11px;margin-top:4px}
 .kcmp .up{color:var(--up)}.kcmp .dn{color:var(--dn)}.kcmp .neu{color:var(--txh)}
 .ai-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:16px;position:relative;overflow:hidden}
 .ai-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--plum),var(--gold))}
 .ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .ai-title{font-size:13px;font-weight:500;color:var(--plum)}
-.ai-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
-.ai-score{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.ai-overall{font-size:20px;font-weight:500;color:var(--tx)}
+.ai-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;background:var(--blush-light);color:var(--plum)}
+.ai-setup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-setup span{font-size:12px;color:var(--txs)}
+.ai-setup input{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:260px;font-family:var(--fj);outline:none}
+.ai-setup input:focus{border-color:var(--plum)}
+.ai-setup button{padding:6px 14px;background:var(--plum);color:#f5e8e1;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--fj)}
+.ai-score{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ai-overall{font-size:18px;font-weight:500;color:var(--tx);min-width:0}
 .ai-meter{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
-.ai-meter-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.ai-fill{height:100%;border-radius:3px;transition:width .6s}
 .ai-num{font-size:12px;color:var(--txs);white-space:nowrap}
 .ai-points{display:flex;flex-direction:column;gap:8px}
-.ai-point{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--tx);line-height:1.5}
-.ai-loading{display:flex;align-items:center;gap:10px;color:var(--txs);font-size:12px;padding:8px 0}
-.ai-error{font-size:12px;color:var(--dn)}
-.ai-refresh{background:none;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--txs);padding:3px 10px;cursor:pointer;font-family:var(--fj);transition:all .15s}
+.ai-point{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5}
+.ai-tag{padding:2px 6px;border-radius:4px;font-size:11px;flex-shrink:0;white-space:nowrap}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--txs);font-size:12px}
+.ai-err{font-size:12px;color:var(--dn)}
+.ai-refresh{background:none;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--txs);padding:3px 10px;cursor:pointer;font-family:var(--fj)}
 .ai-refresh:hover{border-color:var(--plum);color:var(--plum)}
 .crow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 .crow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
@@ -78,10 +84,19 @@ body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;l
 .cleg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txs)}
 .ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.scomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.scrd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.scrd-ttl{font-size:11px;color:var(--txs);margin-bottom:12px;font-weight:500}
+.bar-wrap{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:11px;color:var(--txs);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-bg{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.bar-val{font-size:11px;color:var(--tx);white-space:nowrap;min-width:80px;text-align:right}
 .tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
 .thead2{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:8px 10px;font-size:11px;color:var(--txs);font-weight:500;letter-spacing:.04em;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th{text-align:left;padding:8px 10px;font-size:11px;color:var(--txs);font-weight:500;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 th.r{text-align:right}
 th .arr{font-size:9px;margin-left:3px;opacity:.5}
 th.sort-asc .arr::after{content:'▲'}
@@ -97,9 +112,10 @@ tr:hover td{background:var(--blush-light)}
 .bi{background:#ede8f8;color:#4a3d89}.bk{background:#e2f5ee;color:#0a5c42}
 .rb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
 .rb.hi{background:#eaf3de;color:#3B6D11}.rb.md{background:#faeeda;color:#854F0B}.rb.lo{background:#fcebeb;color:#A32D2D}
+.rate-cell{font-size:11px;color:var(--txs)}
 .ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .swrap{position:relative}
-.sinp{padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:var(--fj);background:var(--bg);color:var(--tx);outline:none;width:220px;transition:border-color .15s}
+.sinp{padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:var(--fj);background:var(--bg);color:var(--tx);outline:none;width:220px}
 .sinp:focus{border-color:var(--plum)}
 .sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txh);pointer-events:none}
 .mtog{display:flex;gap:6px;align-items:center}
@@ -107,24 +123,13 @@ tr:hover td{background:var(--blush-light)}
 .mtog input[type=radio]{accent-color:var(--plum);cursor:pointer}
 .cnt2{font-size:11px;color:var(--txh);white-space:nowrap}
 .frow{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
-.fbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs);transition:all .15s}
+.fbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs)}
 .fbtn.on{background:var(--plum);color:#f5e8e1;border-color:var(--plum)}
 .mb16{margin-bottom:16px}
-.scomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-.scrd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
-.scrd-ttl{font-size:11px;color:var(--txs);margin-bottom:12px;font-weight:500;letter-spacing:.04em}
-.bar-wrap{display:flex;flex-direction:column;gap:8px}
-.bar-row{display:flex;align-items:center;gap:8px}
-.bar-lbl{font-size:11px;color:var(--txs);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-bg{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width .3s}
-.bar-val{font-size:11px;color:var(--tx);white-space:nowrap;min-width:80px;text-align:right}
-.rate-cell{font-size:11px;color:var(--txs)}
-.cmp-lbl{font-size:11px;color:var(--txs);margin-bottom:8px;letter-spacing:.04em}
+.cmp-lbl{font-size:11px;color:var(--txs);margin-bottom:8px}
 </style>
 </head>
 <body>
-
 <div id="pw">
 <div class="pwb">
   <div class="logo">tu-hacci</div>
@@ -134,7 +139,6 @@ tr:hover td{background:var(--blush-light)}
   <div style="color:#A32D2D;font-size:12px;margin-top:8px;display:none" id="pwerr">パスワードが正しくありません</div>
 </div>
 </div>
-
 <div id="main">
 <div class="hdr">
   <div class="hdr-l">
@@ -143,41 +147,36 @@ tr:hover td{background:var(--blush-light)}
   </div>
   <div class="hdr-r">
     <span class="upd" id="upd-lbl">読み込み中...</span>
-    <div class="pgrp" id="pgrp-main">
+    <div class="pgrp" id="pg-main">
       <button class="pbtn on" onclick="setPrd(this,'now')">今月</button>
       <button class="pbtn" onclick="setPrd(this,'last')">先月</button>
       <button class="pbtn" onclick="setPrd(this,'before')">先々月</button>
     </div>
-    <span class="cmp-sep">｜</span>
+    <span class="sep">｜</span>
     <span style="font-size:11px;color:var(--blush);opacity:.7">比較:</span>
-    <div class="pgrp" id="pgrp-cmp">
+    <div class="pgrp" id="pg-cmp">
       <button class="pbtn on" onclick="setCmp(this,'none')">なし</button>
       <button class="pbtn" onclick="setCmp(this,'last')">先月</button>
       <button class="pbtn" onclick="setCmp(this,'before')">先々月</button>
     </div>
   </div>
 </div>
-
 <div class="tabs">
   <div class="tab on" onclick="setTab(0)">サマリー</div>
   <div class="tab" onclick="setTab(1)">アイテムマッチ</div>
   <div class="tab" onclick="setTab(2)">キーワード広告</div>
 </div>
-
 <div class="cnt">
-
-<!-- TAB0 SUMMARY -->
 <div id="t0" class="panel on">
   <div class="ai-card">
     <div class="ai-hdr">
       <span class="ai-title">✦ AI広告分析</span>
-      <span class="ai-badge" style="background:var(--blush-light);color:var(--plum)">Gemini 1.5 Flash</span>
+      <span class="ai-badge">Gemini</span>
       <span style="flex:1"></span>
-      <button class="ai-refresh" onclick="runAI()">↻ 再分析</button>
+      <button class="ai-refresh" onclick="runAI(true)">↻ 再分析</button>
     </div>
-    <div id="ai-body"><div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div></div>
+    <div id="ai-body"><div class="ai-loading"><div class="spinner"></div>初期化中...</div></div>
   </div>
-
   <div class="kgrid">
     <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="k0">—</div><div class="kcmp" id="k0c"></div></div>
     <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="k1">—</div><div class="kcmp" id="k1c"></div></div>
@@ -188,8 +187,7 @@ tr:hover td{background:var(--blush-light)}
     <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="k6">—</div><div class="kdiff" id="k6d"></div></div>
     <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="k7">—</div><div class="kdiff" id="k7d"></div></div>
   </div>
-
-  <div id="cmp-kpi-block" style="display:none">
+  <div id="cmp-blk" style="display:none">
     <div class="cmp-lbl">▸ 比較期間</div>
     <div class="kgrid" style="opacity:.75">
       <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="ck0">—</div></div>
@@ -202,20 +200,15 @@ tr:hover td{background:var(--blush-light)}
       <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="ck7">—</div></div>
     </div>
   </div>
-
   <div class="scomp">
     <div class="scrd"><div class="scrd-ttl">売上構成</div><div class="bar-wrap" id="bar-sales"></div></div>
     <div class="scrd"><div class="scrd-ttl">広告費構成</div><div class="bar-wrap" id="bar-spend"></div></div>
     <div class="scrd"><div class="scrd-ttl">ROAS比較</div><div class="bar-wrap" id="bar-roas"></div></div>
   </div>
-
   <div class="crow">
     <div class="ccard" style="margin-bottom:0">
       <div class="ctit">日別 広告費 × 売上</div>
-      <div class="cleg">
-        <div class="li"><div class="ld" style="background:#5C3D52"></div>広告費</div>
-        <div class="li"><div class="ld" style="background:#C8A882"></div>売上</div>
-      </div>
+      <div class="cleg"><div class="li"><div class="ld" style="background:#5C3D52"></div>広告費</div><div class="li"><div class="ld" style="background:#C8A882"></div>売上</div></div>
       <div style="position:relative;height:200px"><canvas id="css"></canvas></div>
     </div>
     <div class="ccard" style="margin-bottom:0">
@@ -224,24 +217,15 @@ tr:hover td{background:var(--blush-light)}
       <div style="position:relative;height:200px"><canvas id="cpie"></canvas></div>
     </div>
   </div>
-
   <div class="tcard">
     <div class="thead2"><div class="ctit" style="margin:0">キャンペーン別パフォーマンス</div></div>
     <div id="ts-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
   </div>
 </div>
-
-<!-- TAB1 ITEM MATCH -->
 <div id="t1" class="panel">
   <div class="crow">
-    <div class="ccard" style="margin-bottom:0">
-      <div class="ctit">品番別 広告費構成 TOP10</div>
-      <div style="position:relative;height:220px"><canvas id="sku-pie"></canvas></div>
-    </div>
-    <div class="ccard" style="margin-bottom:0">
-      <div class="ctit">キャンペーン別 売上構成</div>
-      <div style="position:relative;height:220px"><canvas id="camp-pie"></canvas></div>
-    </div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">品番別 広告費 TOP10</div><div style="position:relative;height:220px"><canvas id="sku-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">キャンペーン別 売上構成</div><div style="position:relative;height:220px"><canvas id="camp-pie"></canvas></div></div>
   </div>
   <div class="frow">
     <span style="font-size:12px;color:var(--txs)">キャンペーン：</span>
@@ -254,42 +238,25 @@ tr:hover td{background:var(--blush-light)}
       <div class="ctit" style="margin:0">商品別パフォーマンス</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="isrch" type="text" placeholder="商品名・品番で絞り込み" oninput="renderItems()"></div>
-        <div class="mtog">
-          <label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label>
-          <label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label>
-        </div>
+        <div class="mtog"><label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label><label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label></div>
         <span class="cnt2" id="icnt"></span>
       </div>
     </div>
     <div id="ti-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
   </div>
 </div>
-
-<!-- TAB2 KW -->
 <div id="t2" class="panel">
   <div class="crow3">
-    <div class="ccard" style="margin-bottom:0">
-      <div class="ctit">グループ別 広告費</div>
-      <div style="position:relative;height:200px"><canvas id="kw-grp-pie"></canvas></div>
-    </div>
-    <div class="ccard" style="margin-bottom:0">
-      <div class="ctit">品番別 広告費</div>
-      <div style="position:relative;height:200px"><canvas id="kw-sku-pie"></canvas></div>
-    </div>
-    <div class="ccard" style="margin-bottom:0">
-      <div class="ctit">検索KW別 広告費 TOP10</div>
-      <div style="position:relative;height:200px"><canvas id="kw-kw-pie"></canvas></div>
-    </div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">グループ別 広告費</div><div style="position:relative;height:200px"><canvas id="kw-grp-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">品番別 広告費</div><div style="position:relative;height:200px"><canvas id="kw-sku-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">検索KW別 広告費 TOP10</div><div style="position:relative;height:200px"><canvas id="kw-kw-pie"></canvas></div></div>
   </div>
   <div class="tcard mb16">
     <div class="thead2">
       <div class="ctit" style="margin:0">KWグループ別パフォーマンス</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="gsrch" type="text" placeholder="グループ名" oninput="renderGrp()"></div>
-        <div class="mtog">
-          <label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label>
-          <label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label>
-        </div>
+        <div class="mtog"><label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label><label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label></div>
       </div>
     </div>
     <div id="tg-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
@@ -299,142 +266,97 @@ tr:hover td{background:var(--blush-light)}
       <div class="ctit" style="margin:0">検索キーワード × 商品別</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="ksrch" type="text" placeholder="KW・商品名・品番・グループ" oninput="renderKw()"></div>
-        <div class="mtog">
-          <label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label>
-          <label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label>
-        </div>
+        <div class="mtog"><label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label><label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label></div>
         <span class="cnt2" id="kcnt"></span>
       </div>
     </div>
     <div id="tk-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
   </div>
 </div>
-
 </div>
 </div>
-
 <script>
 const API='/api/data';
-let currentPeriod='now',cmpPeriod='none';
+const PW='yahoohamadanobiru28';
+const COLORS=['#5C3D52','#C8A882','#8a6478','#a08595','#d4b8ae','#6e4d62','#b89caa','#c4a882','#7a5569','#e2c4b0'];
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+let period='now',cmpPeriod='none';
 let _cache={};
-
-async function fetchData(type,period){
-  const p=period||currentPeriod;
-  const key=`${type}_${p}`;
-  if(_cache[key])return _cache[key];
-  const res=await fetch(`${API}?type=${type}&period=${p}`);
-  const json=await res.json();
-  if(!json.ok)throw new Error(json.error);
-  _cache[key]=json.data||[];
-  return _cache[key];
-}
-
 let CAMP=[],ITEMS=[],KW_GRP=[],KW_DET=[],DAILY=[],SKU_DATA=[],KW_SKU=[],KW_KW=[];
 let KPI={},CMP_KPI={};
-const COLORS=['#5C3D52','#C8A882','#8a6478','#a08595','#d4b8ae','#6e4d62','#b89caa','#c4a882','#7a5569','#e2c4b0'];
 const fmt=n=>Math.round(n||0).toLocaleString('ja-JP');
-const roasClass=r=>r>=600?'hi':r>=300?'md':'lo';
+const rc=r=>r>=600?'hi':r>=300?'md':'lo';
 const acos=(s,a)=>a>0?((s/a)*100).toFixed(1)+'%':'—';
-const prdLabel={now:'今月',last:'先月',before:'先々月'};
+const prdLbl={now:'今月',last:'先月',before:'先々月'};
 
 function chkPw(){
-  if(document.getElementById('pwi').value==='yahoohamadanobiru28'){
+  if(document.getElementById('pwi').value===PW){
     document.getElementById('pw').style.display='none';
     document.getElementById('main').style.display='block';
-    loadAll();runAI();
-  }else{
-    document.getElementById('pwerr').style.display='block';
-    document.getElementById('pwi').value='';
-  }
+    loadAll();initAI();
+  }else{document.getElementById('pwerr').style.display='block';document.getElementById('pwi').value='';}
 }
-
 function setTab(i){
   document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
   document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',i===j));
 }
-
-function setPrd(el,key){
-  document.querySelectorAll('#pgrp-main .pbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');currentPeriod=key;_cache={};loadAll();runAI();
+function setPrd(el,k){
+  document.querySelectorAll('#pg-main .pbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');period=k;_cache={};loadAll();runAI(false);
 }
-
-function setCmp(el,key){
-  document.querySelectorAll('#pgrp-cmp .pbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');cmpPeriod=key;
-  if(key==='none'){document.getElementById('cmp-kpi-block').style.display='none';}
+function setCmp(el,k){
+  document.querySelectorAll('#pg-cmp .pbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');cmpPeriod=k;
+  if(k==='none'){document.getElementById('cmp-blk').style.display='none';renderKPI();}
   else loadCmp();
 }
-
+async function api(type,p){
+  const k=type+'_'+(p||period);
+  if(_cache[k])return _cache[k];
+  const r=await fetch(`${API}?type=${type}&period=${p||period}`);
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
+  return _cache[k]=j.data||[];
+}
 async function loadAll(){
   try{
     document.getElementById('upd-lbl').textContent='読み込み中...';
-    const [summary,kwSummary,daily,items,kwGroups,kwDetail,skuData,kwSku,kwKw]=await Promise.all([
-      fetchData('summary'),fetchData('kw_summary'),fetchData('daily'),fetchData('items'),
-      fetchData('kw_groups'),fetchData('kw_detail'),fetchData('items_sku'),fetchData('kw_sku'),fetchData('kw_keywords'),
+    const [sum,kws,day,itm,grp,det,sku,ksku,kkw]=await Promise.all([
+      api('summary'),api('kw_summary'),api('daily'),api('items'),
+      api('kw_groups'),api('kw_detail'),api('items_sku'),api('kw_sku'),api('kw_keywords')
     ]);
-    CAMP=[...summary.map(r=>({...r,type:'item'})),...kwSummary.map(r=>({...r,type:'kw'}))];
+    CAMP=[...sum.map(r=>({...r,type:'item'})),...kws.map(r=>({...r,type:'kw'}))];
     const ts=CAMP.reduce((a,c)=>a+(c.spend||0),0);
     const tsa=CAMP.reduce((a,c)=>a+(c.sales||0),0);
-    const tcv=CAMP.reduce((a,c)=>a+(c.cv||0),0);
     const tcl=CAMP.reduce((a,c)=>a+(c.clicks||0),0);
-    const tim=CAMP.reduce((a,c)=>a+(c.imps||0),0);
-    KPI={spend:ts,sales:tsa,cv:tcv,clicks:tcl,imps:tim,
-      roas:tsa>0?Math.round(tsa/ts*100):0,cpc:tcl>0?Math.round(ts/tcl):0};
-    DAILY=daily;
-    ITEMS=items.map(r=>({ysrid:r.ysrid||'',name:r.item_name||'',camp:r.campaign_name,
-      spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks||0}));
-    KW_GRP=kwGroups.map(r=>({name:r.ad_group_name,spend:r.spend,sales:r.sales,
-      roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks}));
-    KW_DET=kwDetail.map(r=>({grp:r.grp,kw:r.kw,ysrid:r.ysrid||'',item:r.item,
-      spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,imps:r.imps}));
-    SKU_DATA=skuData;KW_SKU=kwSku;KW_KW=kwKw;
-    document.getElementById('upd-lbl').textContent=prdLabel[currentPeriod]+'のデータ';
-    renderKPI();renderBars();renderSummaryTable();renderCharts();
-    renderItems();renderGrp();renderKw();renderPieCharts();
+    KPI={spend:ts,sales:tsa,cv:CAMP.reduce((a,c)=>a+(c.cv||0),0),clicks:tcl,imps:CAMP.reduce((a,c)=>a+(c.imps||0),0),roas:tsa>0?Math.round(tsa/ts*100):0,cpc:tcl>0?Math.round(ts/tcl):0};
+    DAILY=day;
+    ITEMS=itm.map(r=>({ysrid:r.ysrid||'',name:r.item_name||'',camp:r.campaign_name,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks||0}));
+    KW_GRP=grp.map(r=>({name:r.ad_group_name,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks}));
+    KW_DET=det.map(r=>({grp:r.grp,kw:r.kw,ysrid:r.ysrid||'',item:r.item,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,imps:r.imps}));
+    SKU_DATA=sku;KW_SKU=ksku;KW_KW=kkw;
+    document.getElementById('upd-lbl').textContent=prdLbl[period]+'のデータ';
+    renderAll();
     if(cmpPeriod!=='none')loadCmp();
-  }catch(e){
-    console.error(e);
-    document.getElementById('upd-lbl').textContent='エラー: '+e.message;
-  }
+  }catch(e){document.getElementById('upd-lbl').textContent='エラー: '+e.message;}
 }
-
 async function loadCmp(){
   if(cmpPeriod==='none')return;
   try{
-    const[s,ks]=await Promise.all([fetchData('summary',cmpPeriod),fetchData('kw_summary',cmpPeriod)]);
+    const[s,ks]=await Promise.all([api('summary',cmpPeriod),api('kw_summary',cmpPeriod)]);
     const all=[...s,...ks];
-    const sp=all.reduce((a,c)=>a+(c.spend||0),0);
-    const sa=all.reduce((a,c)=>a+(c.sales||0),0);
-    const cv=all.reduce((a,c)=>a+(c.cv||0),0);
-    const cl=all.reduce((a,c)=>a+(c.clicks||0),0);
-    const im=all.reduce((a,c)=>a+(c.imps||0),0);
-    CMP_KPI={spend:sp,sales:sa,cv,clicks:cl,imps:im,
-      roas:sa>0?Math.round(sa/sp*100):0,cpc:cl>0?Math.round(sp/cl):0};
-    document.getElementById('cmp-kpi-block').style.display='block';
+    const sp=all.reduce((a,c)=>a+(c.spend||0),0),sa=all.reduce((a,c)=>a+(c.sales||0),0),cl=all.reduce((a,c)=>a+(c.clicks||0),0);
+    CMP_KPI={spend:sp,sales:sa,cv:all.reduce((a,c)=>a+(c.cv||0),0),clicks:cl,imps:all.reduce((a,c)=>a+(c.imps||0),0),roas:sa>0?Math.round(sa/sp*100):0,cpc:cl>0?Math.round(sp/cl):0};
+    document.getElementById('cmp-blk').style.display='block';
     renderCmpKPI();renderKPI();
   }catch(e){console.error(e);}
 }
-
-function renderCmpKPI(){
-  const d=CMP_KPI;
-  document.getElementById('ck0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
-  document.getElementById('ck1').textContent='¥'+fmt(d.spend);
-  document.getElementById('ck2').textContent='¥'+fmt(d.sales);
-  document.getElementById('ck3').textContent=fmt(d.cv);
-  document.getElementById('ck4').textContent=fmt(d.clicks);
-  document.getElementById('ck5').textContent='¥'+fmt(d.cpc);
-  document.getElementById('ck6').textContent=fmt(d.imps);
-  document.getElementById('ck7').textContent=d.sales>0?((d.spend/d.sales)*100).toFixed(1)+'%':'—';
+function renderAll(){renderKPI();renderBars();renderSummaryTable();renderCharts();renderPies();renderItems();renderGrp();renderKw();}
+function diff(cur,prev,lower){
+  if(!prev)return '';
+  const d=cur-prev,p=Math.round(d/prev*100),good=lower?d<0:d>0,cl=d===0?'neu':good?'up':'dn';
+  return `<span class="${cl}">${d>0?'▲':'▼'}${Math.abs(p)}% (${d>0?'+':''}${fmt(d)})</span>`;
 }
-
-function diffHtml(cur,prev,isLower){
-  if(!prev||prev===0)return '';
-  const diff=cur-prev,pct=Math.round(diff/prev*100);
-  const up=isLower?diff<0:diff>0;
-  const cl=diff===0?'neu':up?'up':'dn';
-  return `<span class="${cl}">${diff>0?'▲':'▼'}${Math.abs(pct)}% (${diff>0?'+':''}${fmt(diff)})</span>`;
-}
-
 function renderKPI(){
   const d=KPI;
   document.getElementById('k0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
@@ -450,93 +372,54 @@ function renderKPI(){
   document.getElementById('k4d').textContent='CVR '+(d.clicks>0?((d.cv/d.clicks)*100).toFixed(1):0)+'%';
   document.getElementById('k6d').textContent='CTR '+(d.imps>0?((d.clicks/d.imps)*100).toFixed(2):0)+'%';
   if(cmpPeriod!=='none'&&CMP_KPI.spend){
-    document.getElementById('k0c').innerHTML=diffHtml(d.roas,CMP_KPI.roas,false);
-    document.getElementById('k1c').innerHTML=diffHtml(d.spend,CMP_KPI.spend,true);
-    document.getElementById('k2c').innerHTML=diffHtml(d.sales,CMP_KPI.sales,false);
-    document.getElementById('k3c').innerHTML=diffHtml(d.cv,CMP_KPI.cv,false);
-    document.getElementById('k5c').innerHTML=diffHtml(d.cpc,CMP_KPI.cpc,true);
-  }
+    document.getElementById('k0c').innerHTML=diff(d.roas,CMP_KPI.roas,false);
+    document.getElementById('k1c').innerHTML=diff(d.spend,CMP_KPI.spend,true);
+    document.getElementById('k2c').innerHTML=diff(d.sales,CMP_KPI.sales,false);
+    document.getElementById('k3c').innerHTML=diff(d.cv,CMP_KPI.cv,false);
+    document.getElementById('k5c').innerHTML=diff(d.cpc,CMP_KPI.cpc,true);
+  }else{['k0c','k1c','k2c','k3c','k5c'].forEach(id=>document.getElementById(id).innerHTML='');}
 }
-
+function renderCmpKPI(){
+  const d=CMP_KPI;
+  document.getElementById('ck0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
+  document.getElementById('ck1').textContent='¥'+fmt(d.spend);
+  document.getElementById('ck2').textContent='¥'+fmt(d.sales);
+  document.getElementById('ck3').textContent=fmt(d.cv);
+  document.getElementById('ck4').textContent=fmt(d.clicks);
+  document.getElementById('ck5').textContent='¥'+fmt(d.cpc);
+  document.getElementById('ck6').textContent=fmt(d.imps);
+  document.getElementById('ck7').textContent=d.sales>0?((d.spend/d.sales)*100).toFixed(1)+'%':'—';
+}
 function renderBars(){
-  const ts=CAMP.reduce((a,c)=>a+(c.sales||0),0);
-  const tsp=CAMP.reduce((a,c)=>a+(c.spend||0),0);
-  const mr=Math.max(...CAMP.map(c=>c.roas||0));
-  document.getElementById('bar-sales').innerHTML=CAMP.map((c,i)=>`
-    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
-    <div class="bar-bg"><div class="bar-fill" style="width:${ts>0?(c.sales/ts*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
-    <div class="bar-val">¥${fmt(c.sales)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${ts>0?(c.sales/ts*100).toFixed(1):0}%</span></div></div>`).join('');
-  document.getElementById('bar-spend').innerHTML=CAMP.map((c,i)=>`
-    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
-    <div class="bar-bg"><div class="bar-fill" style="width:${tsp>0?(c.spend/tsp*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
-    <div class="bar-val">¥${fmt(c.spend)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${tsp>0?(c.spend/tsp*100).toFixed(1):0}%</span></div></div>`).join('');
-  document.getElementById('bar-roas').innerHTML=CAMP.map((c,i)=>`
-    <div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div>
-    <div class="bar-bg"><div class="bar-fill" style="width:${mr>0?((c.roas||0)/mr*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div>
-    <div class="bar-val"><span class="rb ${roasClass(c.roas||0)}">${fmt(c.roas||0)}%</span></div></div>`).join('');
+  const ts=CAMP.reduce((a,c)=>a+(c.sales||0),0),tsp=CAMP.reduce((a,c)=>a+(c.spend||0),0),mr=Math.max(...CAMP.map(c=>c.roas||0),1);
+  document.getElementById('bar-sales').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${ts>0?(c.sales/ts*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div><div class="bar-val">¥${fmt(c.sales)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${ts>0?(c.sales/ts*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-spend').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${tsp>0?(c.spend/tsp*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div><div class="bar-val">¥${fmt(c.spend)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${tsp>0?(c.spend/tsp*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-roas').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${((c.roas||0)/mr*100).toFixed(1)}%;background:${COLORS[i%10]}"></div></div><div class="bar-val"><span class="rb ${rc(c.roas||0)}">${fmt(c.roas||0)}%</span></div></div>`).join('');
 }
-
 function renderSummaryTable(){
-  document.getElementById('ts-wrap').innerHTML=`
-    <table><thead><tr>
-      <th>キャンペーン</th><th class="r">広告費</th><th class="r">売上</th><th class="r">ROAS</th>
-      <th class="r">広告費率</th><th class="r">CV数</th><th class="r">CPC</th><th class="r">クリック</th>
-    </tr></thead><tbody>${CAMP.map(r=>`
-      <tr><td><span class="badge ${r.type==='kw'?'bk':'bi'}">${r.campaign_name}</span></td>
-      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
-      <td class="r"><span class="rb ${roasClass(r.roas||0)}">${fmt(r.roas||0)}%</span></td>
-      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-      <td class="r">${fmt(r.cv)}</td><td class="r">¥${fmt(r.cpc)}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}
-    </tbody></table>`;
+  document.getElementById('ts-wrap').innerHTML=`<table><thead><tr><th>キャンペーン</th><th class="r">広告費</th><th class="r">売上</th><th class="r">ROAS</th><th class="r">広告費率</th><th class="r">CV数</th><th class="r">CPC</th><th class="r">クリック</th></tr></thead><tbody>${CAMP.map(r=>`<tr><td><span class="badge ${r.type==='kw'?'bk':'bi'}">${r.campaign_name}</span></td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas||0)}">${fmt(r.roas||0)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${fmt(r.cv)}</td><td class="r">¥${fmt(r.cpc)}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}</tbody></table>`;
 }
-
-let _charts={};
-function dc(id){if(_charts[id]){_charts[id].destroy();delete _charts[id];}}
-
+let _ch={};
+function dc(id){if(_ch[id]){_ch[id].destroy();delete _ch[id];}}
+function mkPie(id,labels,data){
+  dc(id);if(!data||!data.length)return;
+  _ch[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:5}},tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}`}}}}});
+}
 function renderCharts(){
   const labels=DAILY.map(r=>{const d=new Date(r.date);return `${d.getMonth()+1}/${d.getDate()}`;});
   dc('ss');
-  _charts.ss=new Chart(document.getElementById('css'),{
-    data:{labels,datasets:[
-      {type:'bar',data:DAILY.map(r=>Math.round(r.spend||0)),backgroundColor:'#5C3D52',yAxisID:'y'},
-      {type:'line',data:DAILY.map(r=>Math.round(r.sales||0)),borderColor:'#C8A882',backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2,yAxisID:'y2'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},
-        y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},
-        x:{ticks:{font:{size:10},maxRotation:0}}}}
-  });
+  _ch.ss=new Chart(document.getElementById('css'),{data:{labels,datasets:[{type:'bar',data:DAILY.map(r=>Math.round(r.spend||0)),backgroundColor:'#5C3D52',yAxisID:'y'},{type:'line',data:DAILY.map(r=>Math.round(r.sales||0)),borderColor:'#C8A882',backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},x:{ticks:{font:{size:10},maxRotation:0}}}}});
   document.getElementById('pieleg').innerHTML=CAMP.map((c,i)=>`<div class="li"><div class="ld" style="background:${COLORS[i%10]}"></div>${c.campaign_name}</div>`).join('');
   dc('pie');
-  _charts.pie=new Chart(document.getElementById('cpie'),{
-    type:'doughnut',
-    data:{labels:CAMP.map(c=>c.campaign_name),datasets:[{data:CAMP.map(c=>c.spend||0),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}（${KPI.spend>0?Math.round(c.raw/KPI.spend*100):0}%）`}}}}
-  });
+  _ch.pie=new Chart(document.getElementById('cpie'),{type:'doughnut',data:{labels:CAMP.map(c=>c.campaign_name),datasets:[{data:CAMP.map(c=>c.spend||0),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}（${KPI.spend>0?Math.round(c.raw/KPI.spend*100):0}%）`}}}}});
 }
-
-function makePie(id,labels,data){
-  dc(id);
-  if(!data||data.length===0)return;
-  _charts[id]=new Chart(document.getElementById(id),{
-    type:'doughnut',
-    data:{labels,datasets:[{data,backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:5}},
-        tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}`}}}}
-  });
+function renderPies(){
+  mkPie('sku-pie',SKU_DATA.map(r=>r.ysrid||'不明'),SKU_DATA.map(r=>r.spend||0));
+  mkPie('camp-pie',CAMP.filter(c=>c.type==='item').map(c=>c.campaign_name),CAMP.filter(c=>c.type==='item').map(c=>c.sales||0));
+  mkPie('kw-grp-pie',KW_GRP.slice(0,10).map(r=>r.name),KW_GRP.slice(0,10).map(r=>r.spend||0));
+  mkPie('kw-sku-pie',KW_SKU.map(r=>r.ysrid||'不明'),KW_SKU.map(r=>r.spend||0));
+  mkPie('kw-kw-pie',KW_KW.slice(0,10).map(r=>r.kw),KW_KW.slice(0,10).map(r=>r.spend||0));
 }
-
-function renderPieCharts(){
-  makePie('sku-pie',SKU_DATA.map(r=>r.ysrid||'不明'),SKU_DATA.map(r=>r.spend||0));
-  const ic=CAMP.filter(c=>c.type==='item');
-  makePie('camp-pie',ic.map(c=>c.campaign_name),ic.map(c=>c.sales||0));
-  makePie('kw-grp-pie',KW_GRP.slice(0,10).map(r=>r.name),KW_GRP.slice(0,10).map(r=>r.spend||0));
-  makePie('kw-sku-pie',KW_SKU.map(r=>r.ysrid||'不明'),KW_SKU.map(r=>r.spend||0));
-  makePie('kw-kw-pie',KW_KW.slice(0,10).map(r=>r.kw),KW_KW.slice(0,10).map(r=>r.spend||0));
-}
-
 let iFilter='all';
 function setIF(el,k){document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');iFilter=k;renderItems();}
 function renderItems(sort){
@@ -551,147 +434,78 @@ function renderItems(sort){
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('icnt').textContent=f.length+'件';
-  document.getElementById('ti-wrap').innerHTML=`
-    <table><thead><tr>
-      <th style="width:28px">#</th>
-      <th onclick="sortTable('items','ysrid',this)">品番<span class="arr"></span></th>
-      <th onclick="sortTable('items','name',this)">商品名<span class="arr"></span></th>
-      <th onclick="sortTable('items','camp',this)">キャンペーン<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('items','spend',this)">広告費<span class="arr sort-desc"></span></th>
-      <th class="r" onclick="sortTable('items','sales',this)">売上<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('items','roas',this)">ROAS<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('items','acos',this)">広告費率<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('items','cv',this)">CV<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('items','cpc',this)">CPC<span class="arr"></span></th>
-    </tr></thead>
-    <tbody>${f.map((r,i)=>`
-      <tr><td style="color:var(--txh);font-size:11px">${i+1}</td>
-      <td class="sku">${r.ysrid||'—'}</td>
-      <td class="tr">${r.name}</td>
-      <td><span class="badge bi">${r.camp}</span></td>
-      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
-      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-      <td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td></tr>`).join('')}
-    </tbody></table>`;
+  document.getElementById('ti-wrap').innerHTML=`<table><thead><tr><th style="width:28px">#</th><th onclick="sortT('items','ysrid',this)">品番<span class="arr"></span></th><th onclick="sortT('items','name',this)">商品名<span class="arr"></span></th><th onclick="sortT('items','camp',this)">キャンペーン<span class="arr"></span></th><th class="r" onclick="sortT('items','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('items','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('items','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('items','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('items','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('items','cpc',this)">CPC<span class="arr"></span></th></tr></thead><tbody>${f.map((r,i)=>`<tr><td style="color:var(--txh);font-size:11px">${i+1}</td><td class="sku">${r.ysrid||'—'}</td><td class="tr">${r.name}</td><td><span class="badge bi">${r.camp}</span></td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td></tr>`).join('')}</tbody></table>`;
 }
-
 function renderGrp(sort){
   const q=(document.getElementById('gsrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=gm]:checked').value;
   let f=KW_GRP.filter(r=>{if(!q)return true;return mode==='exact'?r.name.toLowerCase()===q:r.name.toLowerCase().includes(q);});
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
-  document.getElementById('tg-wrap').innerHTML=`
-    <table><thead><tr>
-      <th onclick="sortTable('grp','name',this)">グループ<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','spend',this)">広告費<span class="arr sort-desc"></span></th>
-      <th class="r" onclick="sortTable('grp','sales',this)">売上<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','roas',this)">ROAS<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','acos',this)">広告費率<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','cv',this)">CV<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','cpc',this)">CPC<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('grp','clicks',this)">クリック<span class="arr"></span></th>
-    </tr></thead>
-    <tbody>${f.map(r=>`
-      <tr><td>${r.name}</td>
-      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
-      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-      <td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}
-    </tbody></table>`;
+  document.getElementById('tg-wrap').innerHTML=`<table><thead><tr><th onclick="sortT('grp','name',this)">グループ<span class="arr"></span></th><th class="r" onclick="sortT('grp','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('grp','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('grp','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('grp','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('grp','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('grp','cpc',this)">CPC<span class="arr"></span></th><th class="r" onclick="sortT('grp','clicks',this)">クリック<span class="arr"></span></th></tr></thead><tbody>${f.map(r=>`<tr><td>${r.name}</td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}</tbody></table>`;
 }
-
 function renderKw(sort){
   const q=(document.getElementById('ksrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=km]:checked').value;
-  let f=KW_DET.filter(r=>{
-    if(!q)return true;
-    const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());
-    return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));
-  });
+  let f=KW_DET.filter(r=>{if(!q)return true;const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));});
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('kcnt').textContent=f.length+'件';
-  document.getElementById('tk-wrap').innerHTML=`
-    <table><thead><tr>
-      <th onclick="sortTable('kw','grp',this)">グループ<span class="arr"></span></th>
-      <th onclick="sortTable('kw','kw',this)">検索KW<span class="arr"></span></th>
-      <th onclick="sortTable('kw','ysrid',this)">品番<span class="arr"></span></th>
-      <th onclick="sortTable('kw','item',this)">商品名<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('kw','spend',this)">広告費<span class="arr sort-desc"></span></th>
-      <th class="r" onclick="sortTable('kw','sales',this)">売上<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('kw','roas',this)">ROAS<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('kw','acos',this)">広告費率<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('kw','cv',this)">CV<span class="arr"></span></th>
-      <th class="r" onclick="sortTable('kw','imps',this)">インプレ<span class="arr"></span></th>
-    </tr></thead>
-    <tbody>${f.map(r=>`
-      <tr><td><span class="badge bk">${r.grp||''}</span></td>
-      <td class="tr" style="max-width:130px">${r.kw||''}</td>
-      <td class="sku">${r.ysrid||'—'}</td>
-      <td class="tr">${r.item||''}</td>
-      <td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td>
-      <td class="r"><span class="rb ${roasClass(r.roas)}">${fmt(r.roas)}%</span></td>
-      <td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td>
-      <td class="r">${r.cv}</td><td class="r">${fmt(r.imps)}</td></tr>`).join('')}
-    </tbody></table>`;
+  document.getElementById('tk-wrap').innerHTML=`<table><thead><tr><th onclick="sortT('kw','grp',this)">グループ<span class="arr"></span></th><th onclick="sortT('kw','kw',this)">検索KW<span class="arr"></span></th><th onclick="sortT('kw','ysrid',this)">品番<span class="arr"></span></th><th onclick="sortT('kw','item',this)">商品名<span class="arr"></span></th><th class="r" onclick="sortT('kw','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('kw','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('kw','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('kw','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('kw','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('kw','imps',this)">インプレ<span class="arr"></span></th></tr></thead><tbody>${f.map(r=>`<tr><td><span class="badge bk">${r.grp||''}</span></td><td class="tr" style="max-width:130px">${r.kw||''}</td><td class="sku">${r.ysrid||'—'}</td><td class="tr">${r.item||''}</td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">${fmt(r.imps)}</td></tr>`).join('')}</tbody></table>`;
 }
-
-async function runAI(){
+function initAI(){
+  const key=localStorage.getItem('gemini_api_key');
+  if(key)runAI(false);else showKeyInput();
+}
+function showKeyInput(){
+  document.getElementById('ai-body').innerHTML=`<div class="ai-setup"><span>Gemini APIキー:</span><input id="gk" type="password" placeholder="AIzaSy..."><button onclick="saveKey()">設定して分析</button></div>`;
+}
+function saveKey(){
+  const k=(document.getElementById('gk').value||'').trim();
+  if(!k)return;
+  localStorage.setItem('gemini_api_key',k);runAI(false);
+}
+async function runAI(force){
+  const key=localStorage.getItem('gemini_api_key');
+  if(!key){showKeyInput();return;}
   const body=document.getElementById('ai-body');
-  const geminiKey=localStorage.getItem('gemini_api_key')||'';
-  if(!geminiKey){
-    body.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;color:var(--txs)">Gemini APIキー:</span><input id="gkey-inp" type="password" placeholder="AIzaSy..." style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:260px;font-family:var(--fj)"><button onclick="saveGeminiKey()" style="padding:6px 12px;background:var(--plum);color:#f5e8e1;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--fj)">設定して分析</button></div>';
-    return;
-  }
   body.innerHTML='<div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div>';
   try{
-    const [s,ks]=await Promise.all([
-      fetchData('summary','now'),fetchData('summary','last'),fetchData('summary','before'),
-      fetchData('kw_summary','now'),fetchData('kw_summary','last'),fetchData('kw_summary','before'),
-    ]);
-    const bq=await fetch(`${API}?type=summary&period=now`);
-    const prompt=`あなたはEC広告の専門アナリストです。tu-hacci（女性向けランジェリーブランド）のYahoo!広告データを分析してください。\n\n【今月のアイテムマッチ】\n${JSON.stringify(CAMP)}\n\n以下の観点で日本語で分析してください（400〜500文字）:\n1.今月の評価（良い点・悪い点）\n2.特に注目すべきキャンペーン・グループ\n3.原因の仮説\n4.具体的なアクション提案2〜3個\n\n回答はJSONのみ返してください:\n{"overall":"総合評価15文字以内","score":数値0〜100,"points":[{"type":"good"|"bad"|"action","text":"内容"}]}`;
-    const gres=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
-    const gjson=await gres.json();
-    if(gjson.error)throw new Error(gjson.error.message);
-    const rawText=gjson.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    const prompt=`あなたはEC広告の専門アナリストです。tu-hacci（女性向けランジェリーブランド）のYahoo!広告データを分析してください。
+
+【今月のキャンペーン別データ】
+${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0),sales:Math.round(c.sales||0),roas:Math.round(c.roas||0),cv:c.cv||0})))}
+
+以下を日本語で分析してください（合計400〜500文字）:
+1. 今月の評価（良い点・悪い点）
+2. 特に注目すべきキャンペーン・グループ
+3. 原因の仮説
+4. 具体的なアクション提案2〜3個（優先度順）
+
+必ずJSONのみで返してください。説明文・コードブロック・jsonプレフィックスは不要:
+{"overall":"総合評価15文字以内","score":数値0から100,"points":[{"type":"good","text":"内容"},{"type":"bad","text":"内容"},{"type":"action","text":"内容"}]}`;
+    const res=await fetch(`${GEMINI_URL}?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024,responseMimeType:'application/json'}})});
+    const gj=await res.json();
+    if(gj.error)throw new Error(gj.error.message);
+    const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!raw)throw new Error('Geminiから空の応答が返されました');
     let d;
-    try{
-      const cleaned=rawText.replace(/```json|```/g,'').replace(/^\s*json\s*/i,'').trim();
-      d=JSON.parse(cleaned);
-    }catch{d={overall:'分析完了',score:50,points:[{type:'good',text:rawText.slice(0,200)}]};}
+    try{d=JSON.parse(raw);}
+    catch{const m=raw.match(/\{[\s\S]*\}/);if(m)d=JSON.parse(m[0]);else throw new Error('JSONの解析に失敗しました');}
     const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
     const im={good:'✓',bad:'⚠',action:'→'};
     const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
     const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
-    body.innerHTML=`
-      <div class="ai-score">
-        <div class="ai-overall">${d.overall||''}</div>
-        <div class="ai-meter"><div class="ai-meter-fill" style="width:${d.score||50}%;background:${sc}"></div></div>
-        <div class="ai-num">${d.score||50}/100</div>
-      </div>
-      <div class="ai-points">${(d.points||[]).map(p=>`
-        <div class="ai-point">
-          <span style="background:${bg[p.type]||'#f0f0f0'};color:${cl[p.type]||'#333'};padding:2px 6px;border-radius:4px;font-size:11px;flex-shrink:0">${im[p.type]||'•'}</span>
-          <span>${p.text}</span>
-        </div>`).join('')}
-      </div>`;
+    body.innerHTML=`<div class="ai-score"><div class="ai-overall">${d.overall||''}</div><div class="ai-meter"><div class="ai-fill" style="width:${d.score||50}%;background:${sc}"></div></div><div class="ai-num">${d.score||50}/100</div></div><div class="ai-points">${(d.points||[]).map(p=>`<div class="ai-point"><span class="ai-tag" style="background:${bg[p.type]||'#f0f0f0'};color:${cl[p.type]||'#333'}">${im[p.type]||'•'}</span><span>${p.text||''}</span></div>`).join('')}</div>`;
   }catch(e){
-    body.innerHTML=`<div class="ai-error">分析エラー: ${e.message}</div>`;
+    body.innerHTML=`<div class="ai-err">分析エラー: ${e.message} <button class="ai-refresh" onclick="localStorage.removeItem('gemini_api_key');showKeyInput()">キーを再設定</button></div>`;
   }
 }
-
-function saveGeminiKey(){
-  const k=document.getElementById('gkey-inp').value.trim();
-  if(k){localStorage.setItem('gemini_api_key',k);runAI();}
-}
-const _sortState={};
-function sortTable(tbl,key,th){
-  const prev=_sortState[tbl]||{};
-  const dir=prev.key===key?(prev.dir==='asc'?'desc':'asc'):'desc';
-  _sortState[tbl]={key,dir};
+const _ss={};
+function sortT(tbl,key,th){
+  const p=_ss[tbl]||{};
+  const dir=p.key===key?(p.dir==='asc'?'desc':'asc'):'desc';
+  _ss[tbl]={key,dir};
   if(tbl==='items')renderItems({key,dir});
   if(tbl==='grp')renderGrp({key,dir});
   if(tbl==='kw')renderKw({key,dir});
