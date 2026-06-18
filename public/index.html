@@ -235,7 +235,7 @@ tr:hover td{background:var(--blush-light)}
       <div class="ctit" style="margin:0">商品別パフォーマンス</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="isrch" type="text" placeholder="商品名・品番で絞り込み" oninput="renderItems()"></div>
-        <div class="mtog"><label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label><label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label></div>
+        <div class="mtog"><label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label><label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="i-rmin" type="number" oninput="renderItems()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="i-rmax" type="number" oninput="renderItems()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="i-smin" type="number" oninput="renderItems()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="i-smax" type="number" oninput="renderItems()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
         <span class="cnt2" id="icnt"></span>
       </div>
     </div>
@@ -253,7 +253,7 @@ tr:hover td{background:var(--blush-light)}
       <div class="ctit" style="margin:0">KWグループ別パフォーマンス</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="gsrch" type="text" placeholder="グループ名" oninput="renderGrp()"></div>
-        <div class="mtog"><label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label><label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label></div>
+        <div class="mtog"><label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label><label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="g-rmin" type="number" oninput="renderGrp()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="g-rmax" type="number" oninput="renderGrp()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="g-smin" type="number" oninput="renderGrp()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="g-smax" type="number" oninput="renderGrp()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
       </div>
     </div>
     <div id="tg-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
@@ -263,7 +263,7 @@ tr:hover td{background:var(--blush-light)}
       <div class="ctit" style="margin:0">検索キーワード × 商品別</div>
       <div class="ctrl">
         <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="ksrch" type="text" placeholder="KW・商品名・品番・グループ" oninput="renderKw()"></div>
-        <div class="mtog"><label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label><label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label></div>
+        <div class="mtog"><label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label><label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="k-rmin" type="number" oninput="renderKw()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="k-rmax" type="number" oninput="renderKw()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="k-smin" type="number" oninput="renderKw()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="k-smax" type="number" oninput="renderKw()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
         <span class="cnt2" id="kcnt"></span>
       </div>
     </div>
@@ -431,6 +431,13 @@ function renderPies(){
   mkPie('kw-sku-pie',KW_SKU.map(r=>r.ysrid||'不明'),KW_SKU.map(r=>r.spend||0));
   mkPie('kw-kw-pie',KW_KW.slice(0,10).map(r=>r.kw),KW_KW.slice(0,10).map(r=>r.spend||0));
 }
+function _nf(v,minId,maxId){
+  const e1=document.getElementById(minId),e2=document.getElementById(maxId);
+  const mn=e1?parseFloat(e1.value):NaN, mx=e2?parseFloat(e2.value):NaN;
+  if(!isNaN(mn)&&v<mn)return false;
+  if(!isNaN(mx)&&v>mx)return false;
+  return true;
+}
 let iFilter='all';
 function setIF(el,k){document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');iFilter=k;renderItems();}
 function renderItems(sort){
@@ -439,6 +446,8 @@ function renderItems(sort){
   let f=ITEMS.filter(r=>{
     if(iFilter==='z'&&r.camp!=='全商品広告2')return false;
     if(iFilter==='s'&&r.camp!=='商品広告2')return false;
+    if(!_nf(r.roas||0,'i-rmin','i-rmax'))return false;
+    if(!_nf(r.spend||0,'i-smin','i-smax'))return false;
     if(!q)return true;
     return mode==='exact'?[r.name,r.ysrid].some(s=>(s||'').toLowerCase()===q):[r.name,r.ysrid].some(s=>(s||'').toLowerCase().includes(q));
   });
@@ -450,7 +459,7 @@ function renderItems(sort){
 function renderGrp(sort){
   const q=(document.getElementById('gsrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=gm]:checked').value;
-  let f=KW_GRP.filter(r=>{if(!q)return true;return mode==='exact'?r.name.toLowerCase()===q:r.name.toLowerCase().includes(q);});
+  let f=KW_GRP.filter(r=>{if(!_nf(r.roas||0,'g-rmin','g-rmax'))return false;if(!_nf(r.spend||0,'g-smin','g-smax'))return false;if(!q)return true;return mode==='exact'?r.name.toLowerCase()===q:r.name.toLowerCase().includes(q);});
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('tg-wrap').innerHTML=`<table><thead><tr><th onclick="sortT('grp','name',this)">グループ<span class="arr"></span></th><th class="r" onclick="sortT('grp','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('grp','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('grp','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('grp','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('grp','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('grp','cpc',this)">CPC<span class="arr"></span></th><th class="r" onclick="sortT('grp','clicks',this)">クリック<span class="arr"></span></th></tr></thead><tbody>${f.map(r=>`<tr><td>${r.name}</td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}</tbody></table>`;
@@ -458,7 +467,7 @@ function renderGrp(sort){
 function renderKw(sort){
   const q=(document.getElementById('ksrch').value||'').toLowerCase();
   const mode=document.querySelector('input[name=km]:checked').value;
-  let f=KW_DET.filter(r=>{if(!q)return true;const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));});
+  let f=KW_DET.filter(r=>{if(!_nf(r.roas||0,'k-rmin','k-rmax'))return false;if(!_nf(r.spend||0,'k-smin','k-smax'))return false;if(!q)return true;const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));});
   if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
   else f.sort((a,b)=>b.spend-a.spend);
   document.getElementById('kcnt').textContent=f.length+'件';
