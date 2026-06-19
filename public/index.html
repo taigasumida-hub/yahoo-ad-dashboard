@@ -3,726 +3,630 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>不良率ダッシュボード</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.0/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+<title>tu-hacci Yahoo! 広告ダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --navy: #0d1b35;
-    --navy2: #142040;
-    --navy3: #1a2952;
-    --navy4: #1f3266;
-    --sky: #aec8e8;
-    --sky2: #c8dcf0;
-    --sky3: #e8f0f8;
-    --gold: #c9a96e;
-    --gold2: #e2c99a;
-    --gold3: #f0e0c0;
-    --rose: #e8b4c0;
-    --teal: #7cc8c8;
-    --text: #f0f4f8;
-    --text2: #a8bcd0;
-    --text3: #6080a0;
-    --border: rgba(174,200,232,0.12);
-    --border2: rgba(174,200,232,0.22);
-    --card: rgba(20,32,64,0.7);
-    --card2: rgba(26,41,82,0.5);
-    --glass: rgba(255,255,255,0.04);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{
-    background:var(--navy);
-    background-image:
-      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(100,140,200,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(201,169,110,0.05) 0%, transparent 60%);
-    color:var(--text);
-    font-family:'Zen Kaku Gothic New',sans-serif;
-    min-height:100vh;
-    overflow-x:hidden;
-  }
-
-  /* ===== PASSWORD ===== */
-  #pw-screen{
-    position:fixed;inset:0;background:var(--navy);
-    display:flex;align-items:center;justify-content:center;
-    z-index:9999;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(100,150,220,0.1) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 60% at 70% 70%, rgba(201,169,110,0.07) 0%, transparent 60%);
-  }
-  .pw-wrap{text-align:center;max-width:380px;width:90%;}
-  .pw-icon{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:var(--gold);letter-spacing:6px;margin-bottom:8px;}
-  .pw-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--sky2);margin-bottom:4px;letter-spacing:3px;}
-  .pw-sub{font-size:11px;color:var(--text3);letter-spacing:3px;margin-bottom:40px;text-transform:uppercase;}
-  .pw-box{
-    background:rgba(20,32,64,0.8);
-    border:1px solid var(--border2);
-    border-radius:20px;
-    padding:40px 36px;
-    backdrop-filter:blur(20px);
-    box-shadow:0 0 60px rgba(100,140,220,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  .pw-label{font-size:11px;letter-spacing:3px;color:var(--text3);margin-bottom:12px;text-transform:uppercase;}
-  .pw-input{
-    width:100%;padding:14px 20px;
-    background:rgba(255,255,255,0.04);
-    border:1px solid var(--border2);
-    border-radius:12px;color:var(--text);
-    font-size:20px;letter-spacing:8px;text-align:center;
-    outline:none;transition:border-color .3s;
-    font-family:'Cormorant Garamond',serif;
-  }
-  .pw-input:focus{border-color:var(--sky);}
-  .pw-btn{
-    width:100%;margin-top:16px;padding:14px;
-    background:linear-gradient(135deg,var(--navy4),var(--navy3));
-    border:1px solid var(--sky);
-    border-radius:12px;
-    color:var(--sky2);font-size:13px;letter-spacing:3px;
-    cursor:pointer;transition:all .3s;
-    text-transform:uppercase;font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .pw-btn:hover{background:linear-gradient(135deg,var(--navy3),var(--navy4));border-color:var(--sky2);color:var(--text);}
-  .pw-deco{width:40px;height:1px;background:var(--gold);margin:24px auto 0;}
-  .pw-error{color:var(--rose);font-size:12px;margin-top:12px;letter-spacing:1px;display:none;}
-
-  /* ===== LOADING ===== */
-  #loading{
-    position:fixed;inset:0;background:var(--navy);z-index:500;
-    display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  }
-  .loading-word{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;animation:fade 1.5s ease infinite;}
-  @keyframes fade{0%,100%{opacity:.3}50%{opacity:1}}
-  .loading-bar{width:160px;height:1px;background:var(--border2);border-radius:1px;overflow:hidden;}
-  .loading-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold));animation:load 1.8s ease infinite;}
-  @keyframes load{0%{width:0%;margin-left:0}50%{width:80%;margin-left:10%}100%{width:0%;margin-left:100%}}
-
-  /* ===== APP ===== */
-  #app{display:none;}
-
-  /* HEADER */
-  .header{
-    background:rgba(13,27,53,0.95);
-    border-bottom:1px solid var(--border);
-    backdrop-filter:blur(20px);
-    padding:0 40px;height:68px;
-    display:flex;align-items:center;justify-content:space-between;
-    position:sticky;top:0;z-index:100;
-  }
-  .header-left{display:flex;align-items:center;gap:20px;}
-  .header-brand{
-    font-family:'Cormorant Garamond',serif;
-    font-size:20px;font-weight:300;letter-spacing:4px;
-    color:var(--gold2);
-  }
-  .header-div{width:1px;height:24px;background:var(--border2);}
-  .header-title{font-size:14px;color:var(--text2);letter-spacing:1px;}
-  .header-chip{
-    background:rgba(174,200,232,0.06);border:1px solid var(--border);
-    border-radius:20px;padding:4px 14px;font-size:11px;color:var(--text3);letter-spacing:1px;
-  }
-  .header-right{display:flex;align-items:center;gap:16px;}
-  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2.5s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(0.8)}}
-  .live-text{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
-  .reload-btn{
-    background:transparent;border:1px solid var(--border);
-    border-radius:8px;color:var(--text3);padding:7px 16px;font-size:12px;
-    cursor:pointer;transition:all .3s;letter-spacing:1px;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .reload-btn:hover{border-color:var(--sky);color:var(--sky);}
-
-  /* MAIN */
-  .main{padding:32px 40px;max-width:1600px;margin:0 auto;}
-
-  /* SECTION TITLE */
-  .sec-title{
-    font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:400;
-    letter-spacing:4px;color:var(--gold);text-transform:uppercase;
-    margin-bottom:16px;display:flex;align-items:center;gap:12px;
-  }
-  .sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);}
-
-  /* KPI */
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
-  .kpi-card{
-    background:var(--card);border:1px solid var(--border);
-    border-radius:16px;padding:24px 28px;
-    position:relative;overflow:hidden;
-    transition:border-color .3s;
-  }
-  .kpi-card:hover{border-color:var(--border2);}
-  .kpi-card::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,transparent,var(--kpi-color,var(--sky)),transparent);
-  }
-  .kpi-card::after{
-    content:'';position:absolute;top:0;right:0;
-    width:80px;height:80px;border-radius:50%;
-    background:radial-gradient(circle,var(--kpi-color,var(--sky)) 0%,transparent 70%);
-    opacity:.06;transform:translate(20px,-20px);
-  }
-  .kpi-label{font-size:10px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:14px;}
-  .kpi-val{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:var(--text);line-height:1;}
-  .kpi-sub{font-size:11px;color:var(--text3);margin-top:10px;letter-spacing:1px;}
-
-  /* FILTERS */
-  .filter-card{
-    background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:24px 28px;margin-bottom:28px;
-  }
-  .filter-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-  .filter-clear{
-    background:transparent;border:1px solid var(--border);border-radius:8px;
-    color:var(--text3);padding:6px 14px;font-size:11px;cursor:pointer;
-    transition:all .3s;letter-spacing:1px;font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .filter-clear:hover{border-color:var(--rose);color:var(--rose);}
-  .filter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
-  .filter-group label{display:block;font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:6px;text-transform:uppercase;}
-  .filter-sel{
-    width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);
-    border-radius:8px;color:var(--text2);padding:9px 12px;font-size:13px;
-    outline:none;cursor:pointer;transition:border-color .3s;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-    -webkit-appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236080a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 12px center;
-    padding-right:32px;
-  }
-  .filter-sel:focus{border-color:var(--sky);}
-  .filter-sel option{background:var(--navy2);}
-  .filter-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-  .filter-tag{
-    background:rgba(174,200,232,0.08);border:1px solid rgba(174,200,232,0.2);
-    border-radius:20px;padding:5px 14px;font-size:11px;color:var(--sky2);
-    display:flex;align-items:center;gap:8px;letter-spacing:.5px;
-  }
-  .tag-x{cursor:pointer;color:var(--text3);transition:color .2s;}
-  .tag-x:hover{color:var(--rose);}
-
-  /* CHARTS */
-  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
-  .chart-card{
-    background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;
-  }
-  .chart-card.full{grid-column:1/-1;}
-  .chart-head{
-    font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;
-    margin-bottom:20px;display:flex;align-items:center;gap:10px;
-  }
-  .chart-pip{width:5px;height:5px;border-radius:50%;}
-  .chart-wrap{position:relative;height:260px;}
-
-  /* TABLE */
-  .table-card{
-    background:var(--card);border:1px solid var(--border);border-radius:16px;
-    overflow:hidden;margin-bottom:28px;
-  }
-  .table-top{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .table-top-title{font-size:11px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
-  .table-count{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold2);}
-  .tbl-wrap{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead th{
-    background:rgba(26,41,82,0.6);padding:12px 16px;
-    text-align:left;font-size:10px;letter-spacing:2px;color:var(--text3);
-    font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;
-  }
-  tbody tr{border-bottom:1px solid rgba(174,200,232,0.05);transition:background .2s;}
-  tbody tr:hover{background:rgba(174,200,232,0.04);}
-  tbody td{padding:11px 16px;color:var(--text2);white-space:nowrap;}
-  .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:10px;letter-spacing:1px;text-transform:uppercase;}
-  .badge-yes{background:rgba(232,180,192,0.12);color:var(--rose);border:1px solid rgba(232,180,192,0.2);}
-  .badge-no{background:rgba(124,200,200,0.1);color:var(--teal);border:1px solid rgba(124,200,200,0.2);}
-  .table-footer{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
-  .pg-btn{
-    background:transparent;border:1px solid var(--border);border-radius:8px;
-    color:var(--text3);padding:7px 16px;font-size:12px;cursor:pointer;
-    transition:all .3s;letter-spacing:1px;font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .pg-btn:hover{border-color:var(--sky);color:var(--sky);}
-  .pg-btn:disabled{opacity:.25;cursor:default;}
-  .pg-info{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text3);}
-
-  /* AI */
-  .ai-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:28px;}
-  .ai-top{
-    padding:20px 28px;border-bottom:1px solid var(--border);
-    display:flex;align-items:center;gap:16px;
-  }
-  .ai-gem{
-    width:40px;height:40px;border-radius:50%;
-    background:linear-gradient(135deg,var(--navy3),var(--navy4));
-    border:1px solid var(--sky);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--sky2);
-  }
-  .ai-top-title{font-size:14px;font-weight:500;color:var(--text);}
-  .ai-top-sub{font-size:11px;color:var(--text3);letter-spacing:1px;margin-top:2px;}
-  .ai-tabs{display:flex;border-bottom:1px solid var(--border);}
-  .ai-tab{
-    padding:14px 28px;font-size:12px;letter-spacing:2px;cursor:pointer;
-    border-bottom:1px solid transparent;color:var(--text3);
-    transition:all .3s;background:none;border-top:none;border-left:none;border-right:none;
-    text-transform:uppercase;font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .ai-tab.on{color:var(--sky2);border-bottom-color:var(--sky);}
-  .ai-body{padding:28px;}
-  .rep-btn{
-    background:rgba(174,200,232,0.06);border:1px solid var(--border2);
-    border-radius:12px;color:var(--sky2);padding:13px 28px;
-    font-size:13px;letter-spacing:2px;cursor:pointer;
-    display:flex;align-items:center;gap:10px;transition:all .3s;
-    text-transform:uppercase;font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .rep-btn:hover{background:rgba(174,200,232,0.1);border-color:var(--sky);}
-  .rep-btn:disabled{opacity:.4;cursor:default;}
-  .rep-out{
-    margin-top:20px;background:rgba(255,255,255,0.02);border:1px solid var(--border);
-    border-radius:12px;padding:24px;font-size:14px;line-height:1.9;color:var(--text2);
-    white-space:pre-wrap;display:none;
-  }
-  .chat-msgs{
-    height:300px;overflow-y:auto;background:rgba(255,255,255,0.02);
-    border:1px solid var(--border);border-radius:12px;padding:16px;
-    display:flex;flex-direction:column;gap:14px;margin-bottom:12px;
-  }
-  .cmsg{display:flex;gap:10px;}
-  .cmsg.user{flex-direction:row-reverse;}
-  .cbubble{
-    max-width:72%;padding:11px 16px;border-radius:14px;font-size:13px;line-height:1.7;
-  }
-  .cmsg.ai .cbubble{background:rgba(26,41,82,0.8);border:1px solid var(--border);color:var(--text2);}
-  .cmsg.user .cbubble{background:linear-gradient(135deg,var(--navy4),var(--navy3));border:1px solid var(--border2);color:var(--sky2);}
-  .cavatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
-  .cmsg.ai .cavatar{background:var(--navy3);border:1px solid var(--border);}
-  .cmsg.user .cavatar{background:var(--navy4);border:1px solid var(--border2);}
-  .suggs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-  .sug-btn{
-    background:rgba(174,200,232,0.04);border:1px solid var(--border);
-    border-radius:20px;color:var(--text3);padding:6px 14px;font-size:11px;
-    cursor:pointer;transition:all .3s;letter-spacing:.5px;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .sug-btn:hover{border-color:var(--sky);color:var(--sky2);}
-  .chat-row{display:flex;gap:10px;}
-  .chat-inp{
-    flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);
-    border-radius:12px;color:var(--text);padding:12px 18px;font-size:13px;
-    outline:none;transition:border-color .3s;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .chat-inp:focus{border-color:var(--sky);}
-  .chat-send{
-    background:rgba(174,200,232,0.06);border:1px solid var(--border2);
-    border-radius:12px;color:var(--sky2);padding:12px 22px;font-size:13px;
-    cursor:pointer;transition:all .3s;letter-spacing:1px;
-    font-family:'Zen Kaku Gothic New',sans-serif;
-  }
-  .chat-send:hover{background:rgba(174,200,232,0.12);border-color:var(--sky);}
-  .chat-send:disabled{opacity:.4;cursor:default;}
-  .typing{display:flex;gap:5px;align-items:center;padding:4px 0;}
-  .typing span{width:5px;height:5px;background:var(--text3);border-radius:50%;animation:ty .9s infinite;}
-  .typing span:nth-child(2){animation-delay:.18s;}
-  .typing span:nth-child(3){animation-delay:.36s;}
-  @keyframes ty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-  ::-webkit-scrollbar{width:4px;height:4px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-  @media(max-width:900px){
-    .kpi-grid{grid-template-columns:repeat(2,1fr);}
-    .charts-grid{grid-template-columns:1fr;}
-    .main{padding:20px 16px;}
-    .header{padding:0 16px;}
-  }
+:root{
+  --plum:#5C3D52;--plum-dark:#3d2638;--plum-light:#7a5569;
+  --blush:#E8C4B8;--blush-light:#f5e8e1;--gold:#C8A882;
+  --bg:#f7f4f2;--card:#fff;--border:rgba(92,61,82,0.12);
+  --tx:#2a1f25;--txs:#7a6470;--txh:#b0a0aa;
+  --up:#3B6D11;--dn:#A32D2D;
+  --fb:'Cormorant Garamond',Georgia,serif;
+  --fj:'Zen Kaku Gothic New',-apple-system,sans-serif;
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fj);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5}
+#pw{position:fixed;inset:0;background:var(--plum-dark);display:flex;align-items:center;justify-content:center;z-index:1000}
+.pwb{background:var(--card);border-radius:14px;padding:40px 44px;text-align:center;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.pwb .logo{font-family:var(--fb);font-size:26px;color:var(--plum);margin-bottom:4px}
+.pwb .sub{font-size:12px;color:var(--txs);margin-bottom:28px;letter-spacing:.05em}
+.pwb input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--fj);font-size:14px;background:var(--bg);color:var(--tx);outline:none;margin-bottom:12px}
+.pwb input:focus{border-color:var(--plum)}
+.pwb button{width:100%;padding:11px;background:var(--plum);color:#f5e8e1;border:none;border-radius:var(--rs);font-family:var(--fj);font-size:14px;cursor:pointer}
+#main{display:none;min-height:100vh}
+.hdr{background:var(--plum);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.hdr-l{display:flex;align-items:baseline;gap:10px}
+.brand{font-family:var(--fb);font-size:20px;color:var(--blush-light);letter-spacing:.04em}
+.tag{font-size:11px;color:var(--blush);opacity:.7;letter-spacing:.06em}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.upd{font-size:11px;color:var(--blush);opacity:.65}
+.pgrp{display:flex;gap:4px}
+.pbtn{background:transparent;border:1px solid rgba(232,196,184,.3);color:var(--blush);font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;font-family:var(--fj);transition:all .15s}
+.pbtn.on{background:rgba(232,196,184,.18);border-color:var(--blush)}
+.sep{color:rgba(232,196,184,.4);font-size:14px}
+.tabs{background:var(--card);border-bottom:1px solid var(--border);display:flex;padding:0 24px}
+.tab{padding:13px 18px;font-size:13px;color:var(--txs);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab.on{color:var(--plum);border-bottom-color:var(--plum);font-weight:500}
+.cnt{padding:20px 24px;max-width:1380px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+.loading{display:flex;align-items:center;justify-content:center;height:160px;color:var(--txs);font-size:13px;gap:10px}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--plum);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.klbl{font-size:11px;color:var(--txs);letter-spacing:.04em;margin-bottom:6px}
+.kval{font-size:24px;font-weight:500;color:var(--tx);line-height:1.1}
+.kval.sm{font-size:19px}
+.ku{font-size:13px;color:var(--txs)}
+.kdiff{font-size:11px;margin-top:5px;color:var(--txh)}
+.kcmp{font-size:11px;margin-top:4px}
+.kcmp .up{color:var(--up)}.kcmp .dn{color:var(--dn)}.kcmp .neu{color:var(--txh)}
+.ai-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:16px;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--plum),var(--gold))}
+.ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-title{font-size:13px;font-weight:500;color:var(--plum)}
+.ai-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;background:var(--blush-light);color:var(--plum)}
+.ai-setup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-setup span{font-size:12px;color:var(--txs)}
+.ai-setup input{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:260px;font-family:var(--fj);outline:none}
+.ai-setup input:focus{border-color:var(--plum)}
+.ai-setup button{padding:6px 14px;background:var(--plum);color:#f5e8e1;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--fj)}
+.ai-score{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.ai-overall{font-size:18px;font-weight:500;color:var(--tx);min-width:0}
+.ai-meter{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.ai-fill{height:100%;border-radius:3px;transition:width .6s}
+.ai-num{font-size:12px;color:var(--txs);white-space:nowrap}
+.ai-points{display:flex;flex-direction:column;gap:8px}
+.ai-point{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5}
+.ai-tag{padding:2px 6px;border-radius:4px;font-size:11px;flex-shrink:0;white-space:nowrap}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--txs);font-size:12px}
+.ai-err{font-size:12px;color:var(--dn)}
+.ai-refresh{background:none;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--txs);padding:3px 10px;cursor:pointer;font-family:var(--fj)}
+.ai-refresh:hover{border-color:var(--plum);color:var(--plum)}
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.crow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.ctit{font-size:12px;color:var(--txs);font-weight:500;margin-bottom:10px;letter-spacing:.03em}
+.cleg{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txs)}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.scomp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.scrd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.scrd-ttl{font-size:11px;color:var(--txs);margin-bottom:12px;font-weight:500}
+.bar-wrap{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:11px;color:var(--txs);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-bg{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.bar-val{font-size:11px;color:var(--tx);white-space:nowrap;min-width:80px;text-align:right}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.thead2{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:8px 10px;font-size:11px;color:var(--txs);font-weight:500;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th.r{text-align:right}
+th .arr{font-size:9px;margin-left:3px;opacity:.5}
+th.sort-asc .arr::after{content:'▲'}
+th.sort-desc .arr::after{content:'▼'}
+th:not(.sort-asc):not(.sort-desc) .arr::after{content:'⇅'}
+td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--border);color:var(--tx)}
+td.r{text-align:right;white-space:nowrap}
+td.tr{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.sku{font-size:11px;color:var(--txs);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--blush-light)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.bi{background:#ede8f8;color:#4a3d89}.bk{background:#e2f5ee;color:#0a5c42}
+.rb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
+.rb.hi{background:#eaf3de;color:#3B6D11}.rb.md{background:#faeeda;color:#854F0B}.rb.lo{background:#fcebeb;color:#A32D2D}
+.rate-cell{font-size:11px;color:var(--txs)}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.swrap{position:relative}
+.sinp{padding:7px 12px 7px 30px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:var(--fj);background:var(--bg);color:var(--tx);outline:none;width:220px}
+.sinp:focus{border-color:var(--plum)}
+.sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--txh);pointer-events:none}
+.mtog{display:flex;gap:6px;align-items:center}
+.mtog label{font-size:11px;color:var(--txs);display:flex;align-items:center;gap:3px;cursor:pointer}
+.mtog input[type=radio]{accent-color:var(--plum);cursor:pointer}
+.cnt2{font-size:11px;color:var(--txh);white-space:nowrap}
+.frow{display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.fbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs)}
+.fbtn.on{background:var(--plum);color:#f5e8e1;border-color:var(--plum)}
+.agbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:12px;cursor:pointer;font-family:var(--fj);background:var(--card);color:var(--txs)}
+.agbtn.on{background:var(--plum);color:#f5e8e1;border-color:var(--plum)}
+.mb16{margin-bottom:16px}
+.cmp-lbl{font-size:11px;color:var(--txs);margin-bottom:8px}
 </style>
 </head>
 <body>
-
-<!-- PASSWORD -->
-<div id="pw-screen">
-  <div class="pw-wrap">
-    <div class="pw-icon">不良率</div>
-    <div class="pw-title">Dashboard</div>
-    <div class="pw-sub">Defect Analysis System</div>
-    <div class="pw-box">
-      <div class="pw-label">Password</div>
-      <input class="pw-input" type="password" id="pw-input" placeholder="· · · · · · · ·" />
-      <button class="pw-btn" onclick="checkPw()">Enter</button>
-      <div class="pw-error" id="pw-error">パスワードが正しくありません</div>
+<div id="pw">
+<div class="pwb">
+  <div class="logo">tu-hacci</div>
+  <div class="sub">Yahoo! 広告ダッシュボード</div>
+  <input type="password" id="pwi" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')chkPw()">
+  <button onclick="chkPw()">ログイン</button>
+  <div style="color:#A32D2D;font-size:12px;margin-top:8px;display:none" id="pwerr">パスワードが正しくありません</div>
+</div>
+</div>
+<div id="main">
+<div class="hdr">
+  <div class="hdr-l">
+    <span class="brand">tu-hacci</span>
+    <span class="tag">YAHOO! 広告ダッシュボード</span>
+  </div>
+  <div class="hdr-r">
+    <span class="upd" id="upd-lbl">読み込み中...</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--blush);opacity:.75">対象月</span>
+      <select id="sel-month" onchange="onMonth()" style="font-size:12px;padding:4px 8px;border:1px solid #e3d7de;border-radius:6px;background:#fff;color:#4a3340;cursor:pointer"></select>
     </div>
-    <div class="pw-deco"></div>
+    <span class="sep">｜</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--blush);opacity:.75">比較月</span>
+      <select id="sel-cmp" onchange="onCmp()" style="font-size:12px;padding:4px 8px;border:1px solid #e3d7de;border-radius:6px;background:#fff;color:#4a3340;cursor:pointer"><option value="none">なし</option></select>
+    </div>
   </div>
 </div>
-
-<!-- LOADING -->
-<div id="loading">
-  <div class="loading-word">Loading</div>
-  <div class="loading-bar"><div class="loading-fill"></div></div>
+<div class="tabs">
+  <div class="tab on" onclick="setTab(0)">サマリー</div>
+  <div class="tab" onclick="setTab(1)">アイテムマッチ</div>
+  <div class="tab" onclick="setTab(2)">キーワード広告</div>
 </div>
-
-<!-- APP -->
-<div id="app">
-  <div class="header">
-    <div class="header-left">
-      <div class="header-brand">不良率ダッシュボード</div>
-      <div class="header-div"></div>
-      <div class="header-title">Defect Analysis</div>
-      <div class="header-chip" id="updated-chip">同期中...</div>
+<div class="cnt">
+<div id="t0" class="panel on">
+  <div class="ai-card">
+    <div class="ai-hdr">
+      <span class="ai-title">✦ AI広告分析</span>
+      <span class="ai-badge">Gemini</span>
+      <span style="flex:1"></span>
+      <button class="ai-refresh" onclick="runAI(true)">↻ 再分析</button>
     </div>
-    <div class="header-right">
-      <div class="live-dot"></div>
-      <div class="live-text">Live</div>
-      <button class="reload-btn" onclick="reloadData()">再読込</button>
+    <div id="ai-body"><div class="ai-loading"><div class="spinner"></div>初期化中...</div></div>
+  </div>
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="k0">—</div><div class="kcmp" id="k0c"></div></div>
+    <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="k1">—</div><div class="kcmp" id="k1c"></div></div>
+    <div class="kcard"><div class="klbl">広告経由売上</div><div class="kval sm" id="k2">—</div><div class="kcmp" id="k2c"></div></div>
+    <div class="kcard"><div class="klbl">CV数</div><div class="kval" id="k3">—</div><div class="kcmp" id="k3c"></div></div>
+    <div class="kcard"><div class="klbl">クリック数</div><div class="kval" id="k4">—</div><div class="kdiff" id="k4d"></div></div>
+    <div class="kcard"><div class="klbl">CPC</div><div class="kval" id="k5">—</div><div class="kcmp" id="k5c"></div></div>
+    <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="k6">—</div><div class="kdiff" id="k6d"></div></div>
+    <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="k7">—</div><div class="kdiff" id="k7d"></div></div>
+  </div>
+  <div id="cmp-blk" style="display:none">
+    <div class="cmp-lbl">▸ 比較期間</div>
+    <div class="kgrid" style="opacity:.75">
+      <div class="kcard"><div class="klbl">ROAS</div><div class="kval" id="ck0">—</div></div>
+      <div class="kcard"><div class="klbl">広告費</div><div class="kval sm" id="ck1">—</div></div>
+      <div class="kcard"><div class="klbl">広告経由売上</div><div class="kval sm" id="ck2">—</div></div>
+      <div class="kcard"><div class="klbl">CV数</div><div class="kval" id="ck3">—</div></div>
+      <div class="kcard"><div class="klbl">クリック数</div><div class="kval" id="ck4">—</div></div>
+      <div class="kcard"><div class="klbl">CPC</div><div class="kval" id="ck5">—</div></div>
+      <div class="kcard"><div class="klbl">インプレッション</div><div class="kval sm" id="ck6">—</div></div>
+      <div class="kcard"><div class="klbl">広告費率</div><div class="kval sm" id="ck7">—</div></div>
     </div>
   </div>
-
-  <div class="main">
-
-    <div class="sec-title">Overview</div>
-    <div class="kpi-grid">
-      <div class="kpi-card" style="--kpi-color:var(--sky)">
-        <div class="kpi-label">総検品レコード数</div>
-        <div class="kpi-val" id="kpi-total">—</div>
-        <div class="kpi-sub">フィルター適用後</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--rose)">
-        <div class="kpi-label">不良発生件数</div>
-        <div class="kpi-val" id="kpi-defects">—</div>
-        <div class="kpi-sub" id="kpi-rate">不良率 —%</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--gold)">
-        <div class="kpi-label">不良品数合計</div>
-        <div class="kpi-val" id="kpi-qty">—</div>
-        <div class="kpi-sub">数量の合計</div>
-      </div>
-      <div class="kpi-card" style="--kpi-color:var(--teal)">
-        <div class="kpi-label">対象工場数</div>
-        <div class="kpi-val" id="kpi-fac">—</div>
-        <div class="kpi-sub">ユニーク工場</div>
-      </div>
+  <div class="scomp">
+    <div class="scrd"><div class="scrd-ttl">売上構成</div><div class="bar-wrap" id="bar-sales"></div></div>
+    <div class="scrd"><div class="scrd-ttl">広告費構成</div><div class="bar-wrap" id="bar-spend"></div></div>
+    <div class="scrd"><div class="scrd-ttl">ROAS比較</div><div class="bar-wrap" id="bar-roas"></div></div>
+  </div>
+  <div class="crow">
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">日別 広告費 × 売上</div>
+      <div class="cleg"><div class="li"><div class="ld" style="background:#5C3D52"></div>広告費</div><div class="li"><div class="ld" style="background:#C8A882"></div>売上</div></div>
+      <div style="position:relative;height:200px"><canvas id="css"></canvas></div>
     </div>
-
-    <div class="sec-title">Filters</div>
-    <div class="filter-card">
-      <div class="filter-top">
-        <span style="font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;">絞り込み条件</span>
-        <button class="filter-clear" onclick="clearFilters()">クリア</button>
-      </div>
-      <div class="filter-grid" id="filter-grid"></div>
-      <div class="filter-tags" id="filter-tags"></div>
+    <div class="ccard" style="margin-bottom:0">
+      <div class="ctit">キャンペーン別 広告費構成</div>
+      <div class="cleg" id="pieleg"></div>
+      <div style="position:relative;height:200px"><canvas id="cpie"></canvas></div>
     </div>
-
-    <div class="sec-title">Analytics</div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-head"><div class="chart-pip" style="background:var(--sky)"></div>不良項目ランキング</div>
-        <div class="chart-wrap"><canvas id="c-rank"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head"><div class="chart-pip" style="background:var(--rose)"></div>不良カテゴリ構成</div>
-        <div class="chart-wrap"><canvas id="c-pie"></canvas></div>
-      </div>
-      <div class="chart-card full">
-        <div class="chart-head"><div class="chart-pip" style="background:var(--gold)"></div>月別トレンド</div>
-        <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
-      </div>
-      <div class="chart-card full">
-        <div class="chart-head"><div class="chart-pip" style="background:var(--teal)"></div>工場別 不良件数</div>
-        <div class="chart-wrap"><canvas id="c-fac"></canvas></div>
-      </div>
-    </div>
-
-    <div class="sec-title">Data</div>
-    <div class="table-card">
-      <div class="table-top">
-        <div class="table-top-title">Records</div>
-        <div class="table-count" id="t-count">— 件</div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr id="t-head"></tr></thead>
-          <tbody id="t-body"></tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <button class="pg-btn" id="pg-prev" onclick="changePg(-1)">← 前へ</button>
-        <div class="pg-info" id="pg-info">— / —</div>
-        <button class="pg-btn" id="pg-next" onclick="changePg(1)">次へ →</button>
-      </div>
-    </div>
-
-    <div class="sec-title">AI Assistant</div>
-    <div class="ai-card">
-      <div class="ai-top">
-        <div class="ai-gem">✦</div>
-        <div>
-          <div class="ai-top-title">AI アシスタント</div>
-          <div class="ai-top-sub">データに基づいた分析・質問応答</div>
-        </div>
-      </div>
-      <div class="ai-tabs">
-        <button class="ai-tab on" onclick="swTab('rep',this)">自動分析レポート</button>
-        <button class="ai-tab" onclick="swTab('chat',this)">AI チャット</button>
-      </div>
-      <div class="ai-body">
-        <div id="t-rep">
-          <button class="rep-btn" id="rep-btn" onclick="genReport()">✦ &nbsp;現在のデータを分析する</button>
-          <div class="rep-out" id="rep-out"></div>
-        </div>
-        <div id="t-chat" style="display:none">
-          <div class="suggs">
-            <button class="sug-btn" onclick="useSug(this)">不良率が高い工場は？</button>
-            <button class="sug-btn" onclick="useSug(this)">最も多い不良項目は？</button>
-            <button class="sug-btn" onclick="useSug(this)">改善すべき優先事項は？</button>
-            <button class="sug-btn" onclick="useSug(this)">月別トレンドを教えて</button>
-            <button class="sug-btn" onclick="useSug(this)">仕入先別の比較をして</button>
-          </div>
-          <div class="chat-msgs" id="chat-msgs">
-            <div class="cmsg ai">
-              <div class="cavatar">✦</div>
-              <div class="cbubble">こんにちは。不良率データについて何でも聞いてください。フィルターを絞り込んだ状態での分析も可能です。</div>
-            </div>
-          </div>
-          <div class="chat-row">
-            <input class="chat-inp" id="chat-inp" placeholder="例：シンコウ上海の傾向を教えて" onkeydown="if(event.key==='Enter')sendChat()" />
-            <button class="chat-send" id="chat-send" onclick="sendChat()">送信</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  </div>
+  <div class="tcard">
+    <div class="thead2"><div class="ctit" style="margin:0">キャンペーン別パフォーマンス</div></div>
+    <div id="ts-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
   </div>
 </div>
-
+<div id="t1" class="panel">
+  <div class="crow">
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">品番別 広告費 TOP10</div><div style="position:relative;height:220px"><canvas id="sku-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">キャンペーン別 売上構成</div><div style="position:relative;height:220px"><canvas id="camp-pie"></canvas></div></div>
+  </div>
+  <div class="frow">
+    <span style="font-size:12px;color:var(--txs)">キャンペーン：</span>
+    <button class="fbtn on" onclick="setIF(this,'all')">すべて</button>
+    <button class="fbtn" onclick="setIF(this,'z')">全商品広告2</button>
+    <button class="fbtn" onclick="setIF(this,'s')">商品広告2</button>
+  </div>
+  <div class="tcard">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">商品別パフォーマンス</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="isrch" type="text" placeholder="商品名・品番で絞り込み" oninput="renderItems()"></div>
+        <div class="mtog"><label><input type="radio" name="im" value="partial" checked onchange="renderItems()">部分</label><label><input type="radio" name="im" value="exact" onchange="renderItems()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="i-rmin" type="number" oninput="renderItems()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="i-rmax" type="number" oninput="renderItems()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="i-smin" type="number" oninput="renderItems()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="i-smax" type="number" oninput="renderItems()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
+        <span class="cnt2" id="icnt"></span>
+      </div>
+    </div>
+    <div id="ag-items" style="display:flex;gap:6px;padding:2px 0 10px"><button class="agbtn on" onclick="setIAgg(this,'detail')">明細</button><button class="agbtn" onclick="setIAgg(this,'ysrid')">品番累計</button></div>
+    <div id="ti-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+</div>
+<div id="t2" class="panel">
+  <div class="crow3">
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">グループ別 広告費</div><div style="position:relative;height:200px"><canvas id="kw-grp-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">品番別 広告費</div><div style="position:relative;height:200px"><canvas id="kw-sku-pie"></canvas></div></div>
+    <div class="ccard" style="margin-bottom:0"><div class="ctit">検索KW別 広告費 TOP10</div><div style="position:relative;height:200px"><canvas id="kw-kw-pie"></canvas></div></div>
+  </div>
+  <div class="tcard mb16">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">KWグループ別パフォーマンス</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="gsrch" type="text" placeholder="グループ名" oninput="renderGrp()"></div>
+        <div class="mtog"><label><input type="radio" name="gm" value="partial" checked onchange="renderGrp()">部分</label><label><input type="radio" name="gm" value="exact" onchange="renderGrp()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="g-rmin" type="number" oninput="renderGrp()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="g-rmax" type="number" oninput="renderGrp()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="g-smin" type="number" oninput="renderGrp()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="g-smax" type="number" oninput="renderGrp()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
+      </div>
+    </div>
+    <div id="tg-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+  <div class="tcard">
+    <div class="thead2">
+      <div class="ctit" style="margin:0">検索キーワード × 商品別</div>
+      <div class="ctrl">
+        <div class="swrap"><span class="sico">🔍</span><input class="sinp" id="ksrch" type="text" placeholder="KW・商品名・品番・グループ" oninput="renderKw()"></div>
+        <div class="mtog"><label><input type="radio" name="km" value="partial" checked onchange="renderKw()">部分</label><label><input type="radio" name="km" value="exact" onchange="renderKw()">完全</label></div><div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8a6d7a">ROAS<input id="k-rmin" type="number" oninput="renderKw()" placeholder="≥" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="k-rmax" type="number" oninput="renderKw()" placeholder="≤" style="width:46px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><span style="margin-left:6px">広告費</span><input id="k-smin" type="number" oninput="renderKw()" placeholder="≥" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"><input id="k-smax" type="number" oninput="renderKw()" placeholder="≤" style="width:60px;padding:3px 5px;border:1px solid #e3d7de;border-radius:5px;font-size:11px"></div>
+        <span class="cnt2" id="kcnt"></span>
+      </div>
+    </div>
+    <div id="ag-kw" style="display:flex;gap:6px;padding:2px 0 10px"><button class="agbtn on" onclick="setKAgg(this,'detail')">明細：品番×KW</button><button class="agbtn" onclick="setKAgg(this,'ysrid')">品番累計</button><button class="agbtn" onclick="setKAgg(this,'kw')">キーワード累計</button></div>
+    <div id="tk-wrap"><div class="loading"><div class="spinner"></div>取得中...</div></div>
+  </div>
+</div>
+</div>
+</div>
 <script>
-const SHEET='1ueCaG5BejSItYP8xaSBz_Vxl89ld6J06fTOpNqKChYg';
-const GID='1958561503';
-const CSV=`https://docs.google.com/spreadsheets/d/${SHEET}/export?format=csv&gid=${GID}`;
-const PW='kakurega7125';
+const API='/api/data';
+const PW='yahoohamadanobiru28';
+const COLORS=['#5C3D52','#C8A882','#8a6478','#a08595','#d4b8ae','#6e4d62','#b89caa','#c4a882','#7a5569','#e2c4b0'];
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+let period='now',cmpPeriod='none';
+let _cache={};
+let CAMP=[],ITEMS=[],KW_GRP=[],KW_DET=[],DAILY=[],SKU_DATA=[],KW_SKU=[],KW_KW=[];
+let KPI={},CMP_KPI={};
+const fmt=n=>Math.round(n||0).toLocaleString('ja-JP');
+const rc=r=>r>=600?'hi':r>=300?'md':'lo';
+const acos=(s,a)=>a>0?((s/a)*100).toFixed(1)+'%':'—';
+const prdLbl={now:'今月',last:'先月',before:'先々月'};
 
-let allData=[],filtered=[],pg=1,PG=20,charts={},history=[],filters={};
-
-document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
-
-function checkPw(){
-  if(document.getElementById('pw-input').value===PW){
-    document.getElementById('pw-screen').style.display='none';
-    document.getElementById('loading').style.display='flex';
-    document.getElementById('app').style.display='block';
-    loadData();
-  } else {
-    const e=document.getElementById('pw-error');
-    e.style.display='block';
-    setTimeout(()=>e.style.display='none',2200);
-  }
+function chkPw(){
+  if(document.getElementById('pwi').value===PW){
+    document.getElementById('pw').style.display='none';
+    document.getElementById('main').style.display='block';
+    boot();
+  }else{document.getElementById('pwerr').style.display='block';document.getElementById('pwi').value='';}
 }
-
-async function loadData(){
+function setTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',i===j));
+}
+function _mlabel(m){return /^\d{4}-\d{2}$/.test(m)?(m.split('-')[0]+'年'+parseInt(m.split('-')[1],10)+'月'):(prdLbl[m]||m);}
+async function boot(){await loadMonths();await loadAll();runAI(false);}
+async function loadMonths(){
   try{
-    const r=await fetch(CSV);
-    const t=await r.text();
-    const p=Papa.parse(t,{header:true,skipEmptyLines:true});
-    allData=p.data; filtered=[...allData];
-    buildFilters(); applyFilters();
-    document.getElementById('updated-chip').textContent=new Date().toLocaleString('ja-JP');
-    document.getElementById('loading').style.display='none';
-  }catch(e){
-    document.getElementById('loading').innerHTML='<div style="color:var(--rose);text-align:center;font-size:14px;letter-spacing:1px">データ読み込みエラー<br><span style="font-size:11px;opacity:.6">スプレッドシートの共有設定を確認してください</span></div>';
-  }
+    const r=await fetch(API+'?type=months');const j=await r.json();
+    const months=(j.ok&&Array.isArray(j.data)&&j.data.length)?j.data:[];
+    const selM=document.getElementById('sel-month'),selC=document.getElementById('sel-cmp');
+    selM.innerHTML=months.map(m=>'<option value="'+m+'">'+_mlabel(m)+'</option>').join('');
+    selC.innerHTML='<option value="none">なし</option>'+months.map(m=>'<option value="'+m+'">'+_mlabel(m)+'</option>').join('');
+    if(months.length){period=months[0];selM.value=period;}
+    if(months.length>1){cmpPeriod=months[1];selC.value=months[1];}else{cmpPeriod='none';}
+  }catch(e){console.error('months',e);}
 }
-function reloadData(){document.getElementById('loading').style.display='flex';loadData();}
-
-function buildFilters(){
-  const cols=allData.length?Object.keys(allData[0]):[];
-  const grid=document.getElementById('filter-grid');
-  grid.innerHTML='';
-  cols.slice(0,10).forEach(col=>{
-    const vals=[...new Set(allData.map(r=>r[col]).filter(Boolean))].sort();
-    if(vals.length<2||vals.length>80)return;
-    const d=document.createElement('div');
-    d.className='filter-group';
-    d.innerHTML=`<label>${col}</label><select class="filter-sel" onchange="onFil('${col}',this.value)"><option value="">すべて</option>${vals.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>`;
-    grid.appendChild(d);
-  });
+function _aiStale(){
+  const body=document.getElementById('ai-body');
+  if(body)body.innerHTML='<div style="padding:14px;font-size:12.5px;color:#6a5560">期間が変わりました。<button class="ai-refresh" onclick="runAI(true)" style="margin-left:8px">↻ この期間で分析</button></div>';
 }
-
-function onFil(k,v){
-  if(v)filters[k]=v; else delete filters[k];
-  pg=1; applyFilters(); renderTags();
+function onMonth(){period=document.getElementById('sel-month').value;_cache={};loadAll();_aiStale();}
+function onCmp(){
+  cmpPeriod=document.getElementById('sel-cmp').value;
+  if(cmpPeriod==='none'){document.getElementById('cmp-blk').style.display='none';renderKPI();}
+  else loadCmp();
+  _aiStale();
 }
-function renderTags(){
-  document.getElementById('filter-tags').innerHTML=Object.entries(filters).map(([k,v])=>`<div class="filter-tag">${k}：${v}<span class="tag-x" onclick="rmFil('${k}')"> ✕</span></div>`).join('');
+async function api(type,p){
+  const k=type+'_'+(p||period);
+  if(_cache[k])return _cache[k];
+  const r=await fetch(`${API}?type=${type}&period=${p||period}`);
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
+  return _cache[k]=j.data||[];
 }
-function rmFil(k){
-  delete filters[k];
-  document.querySelectorAll('.filter-sel').forEach(s=>{if(s.previousElementSibling?.textContent===k)s.value='';});
-  applyFilters(); renderTags();
+async function loadAll(){
+  try{
+    document.getElementById('upd-lbl').textContent='読み込み中...';
+    const [sum,kws,day,itm,grp,det,sku,ksku,kkw]=await Promise.all([
+      api('summary'),api('kw_summary'),api('daily'),api('items'),
+      api('kw_groups'),api('kw_detail'),api('items_sku'),api('kw_sku'),api('kw_keywords')
+    ]);
+    CAMP=[...sum.map(r=>({...r,type:'item'})),...kws.map(r=>({...r,type:'kw'}))];
+    const ts=CAMP.reduce((a,c)=>a+(c.spend||0),0);
+    const tsa=CAMP.reduce((a,c)=>a+(c.sales||0),0);
+    const tcl=CAMP.reduce((a,c)=>a+(c.clicks||0),0);
+    KPI={spend:ts,sales:tsa,cv:CAMP.reduce((a,c)=>a+(c.cv||0),0),clicks:tcl,imps:CAMP.reduce((a,c)=>a+(c.imps||0),0),roas:tsa>0?Math.round(tsa/ts*100):0,cpc:tcl>0?Math.round(ts/tcl):0};
+    DAILY=day;
+    ITEMS=itm.map(r=>({ysrid:r.ysrid||'',name:r.item_name||'',camp:r.campaign_name,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks||0}));
+    KW_GRP=grp.map(r=>({name:r.ad_group_name,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,cpc:Math.round(r.cpc||0),clicks:r.clicks}));
+    KW_DET=det.map(r=>({grp:r.grp,kw:r.kw,ysrid:r.ysrid||'',item:r.item,spend:r.spend,sales:r.sales,roas:Math.round(r.roas||0),cv:r.cv,imps:r.imps}));
+    SKU_DATA=sku;KW_SKU=ksku;KW_KW=kkw;
+    document.getElementById('upd-lbl').textContent=_mlabel(period)+'のデータ';
+    renderAll();
+    if(cmpPeriod!=='none')loadCmp();
+  }catch(e){document.getElementById('upd-lbl').textContent='エラー: '+e.message;}
 }
-function clearFilters(){
-  filters={};
-  document.querySelectorAll('.filter-sel').forEach(s=>s.value='');
-  applyFilters(); renderTags();
+async function loadCmp(){
+  if(cmpPeriod==='none')return;
+  try{
+    const[s,ks]=await Promise.all([api('summary',cmpPeriod),api('kw_summary',cmpPeriod)]);
+    const all=[...s,...ks];
+    const sp=all.reduce((a,c)=>a+(c.spend||0),0),sa=all.reduce((a,c)=>a+(c.sales||0),0),cl=all.reduce((a,c)=>a+(c.clicks||0),0);
+    CMP_KPI={spend:sp,sales:sa,cv:all.reduce((a,c)=>a+(c.cv||0),0),clicks:cl,imps:all.reduce((a,c)=>a+(c.imps||0),0),roas:sa>0?Math.round(sa/sp*100):0,cpc:cl>0?Math.round(sp/cl):0};
+    document.getElementById('cmp-blk').style.display='block';
+    renderCmpKPI();renderKPI();
+  }catch(e){console.error(e);}
 }
-function applyFilters(){
-  filtered=allData.filter(r=>Object.entries(filters).every(([k,v])=>r[k]===v));
-  updateKPI(); renderCharts(); renderTable();
+function renderAll(){renderKPI();renderBars();renderSummaryTable();renderCharts();renderPies();renderItems();renderGrp();renderKw();}
+function diff(cur,prev,lower){
+  if(!prev)return '';
+  const d=cur-prev,p=Math.round(d/prev*100),good=lower?d<0:d>0,cl=d===0?'neu':good?'up':'dn';
+  return `<span class="${cl}">${d>0?'▲':'▼'}${Math.abs(p)}% (${d>0?'+':''}${fmt(d)})</span>`;
 }
-
-function gk(row,kw){return Object.keys(row).find(k=>k.includes(kw));}
-
-function updateKPI(){
-  const n=filtered.length;
-  const defR=filtered.filter(r=>{const k=gk(r,'不備の有無')||gk(r,'不良の有無');return k&&r[k]==='あり';});
-  let qty=0;
-  filtered.forEach(row=>{Object.keys(row).forEach(k=>{if(k.match(/数量/)){const v=parseInt(row[k])||0;qty+=v;}});});
-  const facs=new Set(filtered.map(r=>{const k=gk(r,'工場');return k?r[k]:'';}).filter(Boolean)).size;
-  document.getElementById('kpi-total').textContent=n.toLocaleString();
-  document.getElementById('kpi-defects').textContent=defR.length.toLocaleString();
-  document.getElementById('kpi-rate').textContent=`不良率 ${n>0?((defR.length/n)*100).toFixed(1):'—'}%`;
-  document.getElementById('kpi-qty').textContent=qty.toLocaleString();
-  document.getElementById('kpi-fac').textContent=facs;
+function renderKPI(){
+  const d=KPI;
+  document.getElementById('k0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
+  document.getElementById('k1').textContent='¥'+fmt(d.spend);
+  document.getElementById('k2').textContent='¥'+fmt(d.sales);
+  document.getElementById('k3').textContent=fmt(d.cv);
+  document.getElementById('k4').textContent=fmt(d.clicks);
+  document.getElementById('k5').textContent='¥'+fmt(d.cpc);
+  document.getElementById('k6').textContent=fmt(d.imps);
+  const ap=d.sales>0?((d.spend/d.sales)*100).toFixed(1):0;
+  document.getElementById('k7').textContent=ap+'%';
+  document.getElementById('k7d').textContent='¥'+fmt(d.spend);
+  document.getElementById('k4d').textContent='CVR '+(d.clicks>0?((d.cv/d.clicks)*100).toFixed(1):0)+'%';
+  document.getElementById('k6d').textContent='CTR '+(d.imps>0?((d.clicks/d.imps)*100).toFixed(2):0)+'%';
+  if(cmpPeriod!=='none'&&CMP_KPI.spend){
+    document.getElementById('k0c').innerHTML=diff(d.roas,CMP_KPI.roas,false);
+    document.getElementById('k1c').innerHTML=diff(d.spend,CMP_KPI.spend,true);
+    document.getElementById('k2c').innerHTML=diff(d.sales,CMP_KPI.sales,false);
+    document.getElementById('k3c').innerHTML=diff(d.cv,CMP_KPI.cv,false);
+    document.getElementById('k5c').innerHTML=diff(d.cpc,CMP_KPI.cpc,true);
+  }else{['k0c','k1c','k2c','k3c','k5c'].forEach(id=>document.getElementById(id).innerHTML='');}
 }
-
-const PAL=['#aec8e8','#e8b4c0','#c9a96e','#7cc8c8','#c8a8e0','#90c8a0','#e8c870','#b8d8f0','#f0b8b0','#a8c8d8'];
-
-function mkChart(id,type,labels,datasets,opts={}){
-  const ctx=document.getElementById(id).getContext('2d');
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:opts.legend||false,labels:{color:'#a8bcd0',font:{size:11},padding:14}}},
-    scales:type==='doughnut'?{}:{
-      x:{ticks:{color:'#a8bcd0',font:{size:11}},grid:{color:'rgba(174,200,232,0.06)'},border:{color:'transparent'}},
-      y:{ticks:{color:'#a8bcd0',font:{size:11}},grid:{color:'rgba(174,200,232,0.06)'},border:{color:'transparent'}}
-    },
-    ...opts
-  }});
+function renderCmpKPI(){
+  const d=CMP_KPI;
+  document.getElementById('ck0').innerHTML=fmt(d.roas)+'<span class="ku">%</span>';
+  document.getElementById('ck1').textContent='¥'+fmt(d.spend);
+  document.getElementById('ck2').textContent='¥'+fmt(d.sales);
+  document.getElementById('ck3').textContent=fmt(d.cv);
+  document.getElementById('ck4').textContent=fmt(d.clicks);
+  document.getElementById('ck5').textContent='¥'+fmt(d.cpc);
+  document.getElementById('ck6').textContent=fmt(d.imps);
+  document.getElementById('ck7').textContent=d.sales>0?((d.spend/d.sales)*100).toFixed(1)+'%':'—';
 }
-
+function renderBars(){
+  const ts=CAMP.reduce((a,c)=>a+(c.sales||0),0),tsp=CAMP.reduce((a,c)=>a+(c.spend||0),0),mr=Math.max(...CAMP.map(c=>c.roas||0),1);
+  document.getElementById('bar-sales').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${ts>0?(c.sales/ts*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div><div class="bar-val">¥${fmt(c.sales)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${ts>0?(c.sales/ts*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-spend').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${tsp>0?(c.spend/tsp*100).toFixed(1):0}%;background:${COLORS[i%10]}"></div></div><div class="bar-val">¥${fmt(c.spend)}<span style="color:var(--txh);font-size:10px;margin-left:4px">${tsp>0?(c.spend/tsp*100).toFixed(1):0}%</span></div></div>`).join('');
+  document.getElementById('bar-roas').innerHTML=CAMP.map((c,i)=>`<div class="bar-row"><div class="bar-lbl">${c.campaign_name}</div><div class="bar-bg"><div class="bar-fill" style="width:${((c.roas||0)/mr*100).toFixed(1)}%;background:${COLORS[i%10]}"></div></div><div class="bar-val"><span class="rb ${rc(c.roas||0)}">${fmt(c.roas||0)}%</span></div></div>`).join('');
+}
+function renderSummaryTable(){
+  document.getElementById('ts-wrap').innerHTML=`<table><thead><tr><th>キャンペーン</th><th class="r">広告費</th><th class="r">売上</th><th class="r">ROAS</th><th class="r">広告費率</th><th class="r">CV数</th><th class="r">CPC</th><th class="r">クリック</th></tr></thead><tbody>${CAMP.map(r=>`<tr><td><span class="badge ${r.type==='kw'?'bk':'bi'}">${r.campaign_name}</span></td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas||0)}">${fmt(r.roas||0)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${fmt(r.cv)}</td><td class="r">¥${fmt(r.cpc)}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}</tbody></table>`;
+}
+let _ch={};
+function dc(id){if(_ch[id]){_ch[id].destroy();delete _ch[id];}}
+function mkPie(id,labels,data){
+  dc(id);if(!data||!data.length)return;
+  _ch[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:5}},tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}`}}}}});
+}
 function renderCharts(){
-  // rank
-  const rc={};
-  filtered.forEach(r=>Object.keys(r).forEach(k=>{if(k.includes('不備項目')||k.includes('不良項目')){const v=r[k];if(v&&v!=='なし'&&v.trim())rc[v]=(rc[v]||0)+1;}}));
-  const rs=Object.entries(rc).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  mkChart('c-rank','bar',rs.map(x=>x[0]),[{data:rs.map(x=>x[1]),backgroundColor:PAL,borderRadius:6,borderSkipped:false}]);
-  // pie
-  const pc={};
-  filtered.forEach(r=>{const k=gk(r,'不備項目①')||gk(r,'不良項目①');if(k){const v=r[k];if(v&&v!=='なし'&&v.trim())pc[v]=(pc[v]||0)+1;}});
-  const ps=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  mkChart('c-pie','doughnut',ps.map(x=>x[0]),[{data:ps.map(x=>x[1]),backgroundColor:PAL,borderWidth:0,hoverOffset:6}],{legend:true,cutout:'62%'});
-  // trend
-  const tc={};
-  filtered.forEach(r=>{const k=gk(r,'報告月');if(k&&r[k])tc[r[k]]=(tc[r[k]]||0)+1;});
-  const tk=Object.keys(tc).sort();
-  mkChart('c-trend','line',tk,[{data:tk.map(k=>tc[k]),borderColor:'#c9a96e',backgroundColor:'rgba(201,169,110,0.08)',fill:true,tension:.4,pointBackgroundColor:'#c9a96e',pointRadius:4,pointHoverRadius:6}]);
-  // factory
-  const fc={};
-  filtered.forEach(r=>{const k=gk(r,'工場');if(k&&r[k])fc[r[k]]=(fc[r[k]]||0)+1;});
-  const fs=Object.entries(fc).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  mkChart('c-fac','bar',fs.map(x=>x[0]),[{data:fs.map(x=>x[1]),backgroundColor:PAL,borderRadius:6,borderSkipped:false}]);
+  const labels=DAILY.map(r=>{const d=new Date(r.date);return `${d.getMonth()+1}/${d.getDate()}`;});
+  dc('ss');
+  _ch.ss=new Chart(document.getElementById('css'),{data:{labels,datasets:[{type:'bar',data:DAILY.map(r=>Math.round(r.spend||0)),backgroundColor:'#5C3D52',yAxisID:'y'},{type:'line',data:DAILY.map(r=>Math.round(r.sales||0)),borderColor:'#C8A882',backgroundColor:'transparent',borderWidth:2,tension:.3,pointRadius:2,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10},callback:v=>'¥'+Math.round(v/1000)+'k'}},x:{ticks:{font:{size:10},maxRotation:0}}}}});
+  document.getElementById('pieleg').innerHTML=CAMP.map((c,i)=>`<div class="li"><div class="ld" style="background:${COLORS[i%10]}"></div>${c.campaign_name}</div>`).join('');
+  dc('pie');
+  _ch.pie=new Chart(document.getElementById('cpie'),{type:'doughnut',data:{labels:CAMP.map(c=>c.campaign_name),datasets:[{data:CAMP.map(c=>c.spend||0),backgroundColor:COLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`¥${fmt(c.raw)}（${KPI.spend>0?Math.round(c.raw/KPI.spend*100):0}%）`}}}}});
 }
-
-function renderTable(){
-  const cols=allData.length?Object.keys(allData[0]).slice(0,13):[];
-  const head=document.getElementById('t-head');
-  if(!head.children.length) head.innerHTML=cols.map(c=>`<th>${c}</th>`).join('');
-  const sl=filtered.slice((pg-1)*PG,pg*PG);
-  document.getElementById('t-body').innerHTML=sl.map(r=>
-    `<tr>${cols.map(c=>{
-      let v=r[c]||'';
-      if(c.includes('不備の有無')||c.includes('不良の有無'))v=v==='あり'?`<span class="badge badge-yes">あり</span>`:v==='なし'?`<span class="badge badge-no">なし</span>`:v;
-      return `<td>${v}</td>`;
-    }).join('')}</tr>`
-  ).join('');
-  const tot=filtered.length,pgs=Math.ceil(tot/PG)||1;
-  document.getElementById('t-count').textContent=`${tot.toLocaleString()} 件`;
-  document.getElementById('pg-info').textContent=`${pg} / ${pgs}`;
-  document.getElementById('pg-prev').disabled=pg<=1;
-  document.getElementById('pg-next').disabled=pg>=pgs;
+function renderPies(){
+  mkPie('sku-pie',SKU_DATA.map(r=>r.ysrid||'不明'),SKU_DATA.map(r=>r.spend||0));
+  mkPie('camp-pie',CAMP.filter(c=>c.type==='item').map(c=>c.campaign_name),CAMP.filter(c=>c.type==='item').map(c=>c.sales||0));
+  mkPie('kw-grp-pie',KW_GRP.slice(0,10).map(r=>r.name),KW_GRP.slice(0,10).map(r=>r.spend||0));
+  mkPie('kw-sku-pie',KW_SKU.map(r=>r.ysrid||'不明'),KW_SKU.map(r=>r.spend||0));
+  mkPie('kw-kw-pie',KW_KW.slice(0,10).map(r=>r.kw),KW_KW.slice(0,10).map(r=>r.spend||0));
 }
-function changePg(d){pg+=d;renderTable();}
-
-function swTab(tab,el){
-  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('t-rep').style.display=tab==='rep'?'block':'none';
-  document.getElementById('t-chat').style.display=tab==='chat'?'block':'none';
+function _nf(v,minId,maxId){
+  const e1=document.getElementById(minId),e2=document.getElementById(maxId);
+  const mn=e1?parseFloat(e1.value):NaN, mx=e2?parseFloat(e2.value):NaN;
+  if(!isNaN(mn)&&v<mn)return false;
+  if(!isNaN(mx)&&v>mx)return false;
+  return true;
 }
-
-function summary(){
-  const n=filtered.length;
-  const d=filtered.filter(r=>{const k=gk(r,'不備の有無')||gk(r,'不良の有無');return k&&r[k]==='あり';});
-  const dc={};
-  filtered.forEach(r=>Object.keys(r).forEach(k=>{if(k.includes('不備項目')||k.includes('不良項目')){const v=r[k];if(v&&v!=='なし'&&v.trim())dc[v]=(dc[v]||0)+1;}}));
-  const t5=Object.entries(dc).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const fc={};
-  filtered.forEach(r=>{const k=gk(r,'工場');if(k&&r[k])fc[r[k]]=(fc[r[k]]||0)+1;});
-  return `【データ】総数:${n}件 / 不良あり:${d.length}件(${n>0?((d.length/n)*100).toFixed(1):'—'}%) / フィルター:${JSON.stringify(filters)}\n【不良TOP5】${t5.map((x,i)=>`${i+1}.${x[0]}:${x[1]}件`).join(' ')}\n【工場別】${Object.entries(fc).map(([k,v])=>`${k}:${v}件`).join(' ')}`;
+let iAgg='detail',kAgg='detail';
+function _aggBy(rows,key){
+  const m={};
+  rows.forEach(r=>{const k=r[key]||'(なし)';if(!m[k])m[k]={[key]:r[key]||'',spend:0,sales:0,cv:0,clicks:0,imps:0};const o=m[k];o.spend+=r.spend||0;o.sales+=r.sales||0;o.cv+=r.cv||0;o.clicks+=r.clicks||0;o.imps+=r.imps||0;});
+  return Object.values(m).map(o=>{o.roas=o.spend?Math.round(o.sales/o.spend*100):0;o.cpc=o.clicks?Math.round(o.spend/o.clicks):0;return o;});
 }
-
-async function genReport(){
-  const btn=document.getElementById('rep-btn');
-  const out=document.getElementById('rep-out');
-  btn.disabled=true;btn.textContent='✦  分析中...';
-  out.style.display='block';out.textContent='';
+function _yname(y){if(!y)return '';const a=ITEMS.find(r=>r.ysrid===y);if(a&&a.name)return a.name;const b=(typeof KW_DET!=='undefined'?KW_DET:[]).find(r=>r.ysrid===y);if(b&&b.item)return b.item;return '';}
+function toggleName(cell,y){const tr=cell.closest('tr');const nx=tr.nextElementSibling;if(nx&&nx.classList.contains('exp')){nx.remove();return;}const cols=tr.children.length;const r=document.createElement('tr');r.className='exp';r.innerHTML='<td colspan="'+cols+'" style="background:#faf4ee;color:#5a4250;font-size:11.5px;padding:6px 12px 6px 18px">&#128722; '+(_yname(y)||'（名称データなし）')+'</td>';tr.after(r);}
+function setIAgg(el,k){document.querySelectorAll('#ag-items .agbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');iAgg=k;renderItems();}
+function setKAgg(el,k){document.querySelectorAll('#ag-kw .agbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');kAgg=k;renderKw();}
+let iFilter='all';
+function setIF(el,k){document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');iFilter=k;renderItems();}
+function renderItems(sort){
+  const q=(document.getElementById('isrch').value||'').toLowerCase();
+  const mode=document.querySelector('input[name=im]:checked').value;
+  let base=ITEMS.filter(r=>{
+    if(iFilter==='z'&&r.camp!=='全商品広告2')return false;
+    if(iFilter==='s'&&r.camp!=='商品広告2')return false;
+    if(!_nf(r.roas||0,'i-rmin','i-rmax'))return false;
+    if(!_nf(r.spend||0,'i-smin','i-smax'))return false;
+    if(!q)return true;
+    return mode==='exact'?[r.name,r.ysrid].some(s=>(s||'').toLowerCase()===q):[r.name,r.ysrid].some(s=>(s||'').toLowerCase().includes(q));
+  });
+  const agg=(iAgg==='ysrid');
+  let f=agg?_aggBy(base,'ysrid'):base.slice();
+  if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
+  else f.sort((a,b)=>b.spend-a.spend);
+  document.getElementById('icnt').textContent=f.length+'件';
+  const skuCell=r=>'<td style="cursor:pointer;color:#7a4f6d;text-decoration:underline dotted 1px;font-size:11.5px" onclick="toggleName(this,\''+(r.ysrid||'')+'\')">'+( r.ysrid||'—')+'</td>';
+  let head,body;
+  if(agg){
+    head='<th style="width:28px">#</th><th>品番 &#9432;</th><th class="r" onclick="sortT(\'items\',\'spend\',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT(\'items\',\'sales\',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'roas\',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'cv\',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'cpc\',this)">CPC<span class="arr"></span></th>';
+    body=f.map((r,i)=>'<tr><td style="color:var(--txh);font-size:11px">'+(i+1)+'</td>'+skuCell(r)+'<td class="r">¥'+fmt(r.spend)+'</td><td class="r">¥'+fmt(r.sales)+'</td><td class="r"><span class="rb '+rc(r.roas)+'">'+fmt(r.roas)+'%</span></td><td class="r">'+r.cv+'</td><td class="r">¥'+r.cpc+'</td></tr>').join('');
+  }else{
+    head='<th style="width:28px">#</th><th>品番 &#9432;</th><th onclick="sortT(\'items\',\'camp\',this)">キャンペーン<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'spend\',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT(\'items\',\'sales\',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'roas\',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'acos\',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'cv\',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT(\'items\',\'cpc\',this)">CPC<span class="arr"></span></th>';
+    body=f.map((r,i)=>'<tr><td style="color:var(--txh);font-size:11px">'+(i+1)+'</td>'+skuCell(r)+'<td><span class="badge bi">'+r.camp+'</span></td><td class="r">¥'+fmt(r.spend)+'</td><td class="r">¥'+fmt(r.sales)+'</td><td class="r"><span class="rb '+rc(r.roas)+'">'+fmt(r.roas)+'%</span></td><td class="r"><div class="rate-cell">'+acos(r.spend,r.sales)+'</div><div class="rate-cell">¥'+fmt(r.spend)+'</div></td><td class="r">'+r.cv+'</td><td class="r">¥'+r.cpc+'</td></tr>').join('');
+  }
+  document.getElementById('ti-wrap').innerHTML='<table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>';
+}
+function renderGrp(sort){
+  const q=(document.getElementById('gsrch').value||'').toLowerCase();
+  const mode=document.querySelector('input[name=gm]:checked').value;
+  let f=KW_GRP.filter(r=>{if(!_nf(r.roas||0,'g-rmin','g-rmax'))return false;if(!_nf(r.spend||0,'g-smin','g-smax'))return false;if(!q)return true;return mode==='exact'?r.name.toLowerCase()===q:r.name.toLowerCase().includes(q);});
+  if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
+  else f.sort((a,b)=>b.spend-a.spend);
+  document.getElementById('tg-wrap').innerHTML=`<table><thead><tr><th onclick="sortT('grp','name',this)">グループ<span class="arr"></span></th><th class="r" onclick="sortT('grp','spend',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT('grp','sales',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT('grp','roas',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT('grp','acos',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT('grp','cv',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT('grp','cpc',this)">CPC<span class="arr"></span></th><th class="r" onclick="sortT('grp','clicks',this)">クリック<span class="arr"></span></th></tr></thead><tbody>${f.map(r=>`<tr><td>${r.name}</td><td class="r">¥${fmt(r.spend)}</td><td class="r">¥${fmt(r.sales)}</td><td class="r"><span class="rb ${rc(r.roas)}">${fmt(r.roas)}%</span></td><td class="r"><div class="rate-cell">${acos(r.spend,r.sales)}</div><div class="rate-cell">¥${fmt(r.spend)}</div></td><td class="r">${r.cv}</td><td class="r">¥${r.cpc}</td><td class="r">${fmt(r.clicks)}</td></tr>`).join('')}</tbody></table>`;
+}
+function renderKw(sort){
+  const q=(document.getElementById('ksrch').value||'').toLowerCase();
+  const mode=document.querySelector('input[name=km]:checked').value;
+  let base=KW_DET.filter(r=>{
+    if(!_nf(r.roas||0,'k-rmin','k-rmax'))return false;
+    if(!_nf(r.spend||0,'k-smin','k-smax'))return false;
+    if(!q)return true;
+    const t=[r.kw,r.item,r.grp,r.ysrid].map(s=>(s||'').toLowerCase());
+    return mode==='exact'?t.some(s=>s===q):t.some(s=>s.includes(q));
+  });
+  let f;
+  if(kAgg==='ysrid')f=_aggBy(base,'ysrid');
+  else if(kAgg==='kw')f=_aggBy(base,'kw');
+  else f=base.slice();
+  if(sort){const m=sort.dir==='asc'?1:-1;f.sort((a,b)=>(a[sort.key]>b[sort.key]?1:-1)*m);}
+  else f.sort((a,b)=>b.spend-a.spend);
+  document.getElementById('kcnt').textContent=f.length+'件';
+  const skuCell=r=>'<td style="cursor:pointer;color:#7a4f6d;text-decoration:underline dotted 1px;font-size:11.5px" onclick="toggleName(this,\''+(r.ysrid||'')+'\')">'+( r.ysrid||'—')+'</td>';
+  let head,body;
+  if(kAgg==='ysrid'){
+    head='<th>品番 &#9432;</th><th class="r" onclick="sortT(\'kw\',\'spend\',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT(\'kw\',\'sales\',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'roas\',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'cv\',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'imps\',this)">インプレ<span class="arr"></span></th>';
+    body=f.map(r=>'<tr>'+skuCell(r)+'<td class="r">¥'+fmt(r.spend)+'</td><td class="r">¥'+fmt(r.sales)+'</td><td class="r"><span class="rb '+rc(r.roas)+'">'+fmt(r.roas)+'%</span></td><td class="r">'+r.cv+'</td><td class="r">'+fmt(r.imps)+'</td></tr>').join('');
+  }else if(kAgg==='kw'){
+    head='<th onclick="sortT(\'kw\',\'kw\',this)">検索KW<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'spend\',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT(\'kw\',\'sales\',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'roas\',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'cv\',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'imps\',this)">インプレ<span class="arr"></span></th>';
+    body=f.map(r=>'<tr><td style="max-width:220px">'+( r.kw||'')+'</td><td class="r">¥'+fmt(r.spend)+'</td><td class="r">¥'+fmt(r.sales)+'</td><td class="r"><span class="rb '+rc(r.roas)+'">'+fmt(r.roas)+'%</span></td><td class="r">'+r.cv+'</td><td class="r">'+fmt(r.imps)+'</td></tr>').join('');
+  }else{
+    head='<th onclick="sortT(\'kw\',\'grp\',this)">グループ<span class="arr"></span></th><th onclick="sortT(\'kw\',\'kw\',this)">検索KW<span class="arr"></span></th><th>品番 &#9432;</th><th class="r" onclick="sortT(\'kw\',\'spend\',this)">広告費<span class="arr sort-desc"></span></th><th class="r" onclick="sortT(\'kw\',\'sales\',this)">売上<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'roas\',this)">ROAS<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'acos\',this)">広告費率<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'cv\',this)">CV<span class="arr"></span></th><th class="r" onclick="sortT(\'kw\',\'imps\',this)">インプレ<span class="arr"></span></th>';
+    body=f.map(r=>'<tr><td><span class="badge bk">'+( r.grp||'')+'</span></td><td style="max-width:130px">'+( r.kw||'')+'</td>'+skuCell(r)+'<td class="r">¥'+fmt(r.spend)+'</td><td class="r">¥'+fmt(r.sales)+'</td><td class="r"><span class="rb '+rc(r.roas)+'">'+fmt(r.roas)+'%</span></td><td class="r"><div class="rate-cell">'+acos(r.spend,r.sales)+'</div><div class="rate-cell">¥'+fmt(r.spend)+'</div></td><td class="r">'+r.cv+'</td><td class="r">'+fmt(r.imps)+'</td></tr>').join('');
+  }
+  document.getElementById('tk-wrap').innerHTML='<table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>';
+}
+function initAI(){
+  runAI(false);
+}
+function showKeyInput(){
+  document.getElementById('ai-body').innerHTML=`<div class="ai-setup"><span>Gemini APIキー:</span><input id="gk" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other" name="gemini_key_field" placeholder="AIzaSy..."><button onclick="saveKey()">設定して分析</button></div>`;
+}
+function saveKey(){
+  const k=(document.getElementById('gk').value||'').trim();
+  if(!k)return;
+  if(!k.startsWith('AIzaSy')){alert('Gemini APIキーは「AIzaSy」で始まります。\nパスワードマネージャーがログインパスワードを入れた可能性があります。\n手でキーを貼り直してください。');return;}
+  localStorage.setItem('gemini_api_key',k);runAI(false);
+}
+async function runAI_OLD_DISABLED(force){
+  const key=localStorage.getItem('gemini_api_key');
+  if(!key){showKeyInput();return;}
+  const body=document.getElementById('ai-body');
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>過去3ヶ月のデータを分析中...</div>';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        messages:[{role:'user',content:`品質管理専門家として不良率データを日本語で分析してください。\n${summary()}\n\n1.全体サマリー 2.問題不良項目TOP3と原因仮説 3.工場・仕入先別課題 4.月別トレンド 5.優先改善アクション3点 を具体的数値込みで。`}]})
-    });
-    const d=await res.json();
-    out.textContent=d.content?.[0]?.text||'エラーが発生しました';
-  }catch(e){out.textContent='AI分析に失敗しました。';}
-  btn.disabled=false;btn.innerHTML='✦ &nbsp;再分析する';
-}
+    const prompt=`あなたはEC広告の専門アナリストです。tu-hacci（女性向けランジェリーブランド）のYahoo!広告データを分析してください。
 
-async function sendChat(){
-  const inp=document.getElementById('chat-inp');
-  const msg=inp.value.trim();if(!msg)return;
-  inp.value='';addMsg('user',msg);
-  const tid=addTyping();
-  document.getElementById('chat-send').disabled=true;
-  history.push({role:'user',content:msg});
+【今月のキャンペーン別データ】
+${JSON.stringify(CAMP.map(c=>({name:c.campaign_name,spend:Math.round(c.spend||0),sales:Math.round(c.sales||0),roas:Math.round(c.roas||0),cv:c.cv||0})))}
+
+以下を日本語で分析してください（合計400〜500文字）:
+1. 今月の評価（良い点・悪い点）
+2. 特に注目すべきキャンペーン・グループ
+3. 原因の仮説
+4. 具体的なアクション提案2〜3個（優先度順）
+
+必ずJSONのみで返してください。説明文・コードブロック・jsonプレフィックスは不要:
+{"overall":"総合評価15文字以内","score":数値0から100,"points":[{"type":"good","text":"内容"},{"type":"bad","text":"内容"},{"type":"action","text":"内容"}]}`;
+    const res=await fetch(`${GEMINI_URL}?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1024}})});
+    const gj=await res.json();
+    if(gj.error)throw new Error(gj.error.message);
+    const raw=gj.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    if(!raw)throw new Error('Geminiから空の応答が返されました');
+    let d;
+    const cleaned=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    try{d=JSON.parse(cleaned);}
+    catch{const m=cleaned.match(/\{[\s\S]*\}/);if(m)d=JSON.parse(m[0]);else throw new Error('JSONの解析に失敗しました: '+cleaned.slice(0,100));}
+    const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
+    const im={good:'✓',bad:'⚠',action:'→'};
+    const bg={good:'#eaf3de',bad:'#fcebeb',action:'#e8f0fb'};
+    const cl={good:'#3B6D11',bad:'#A32D2D',action:'#1a4db8'};
+    body.innerHTML=`<div class="ai-score"><div class="ai-overall">${d.overall||''}</div><div class="ai-meter"><div class="ai-fill" style="width:${d.score||50}%;background:${sc}"></div></div><div class="ai-num">${d.score||50}/100</div></div><div class="ai-points">${(d.points||[]).map(p=>`<div class="ai-point"><span class="ai-tag" style="background:${bg[p.type]||'#f0f0f0'};color:${cl[p.type]||'#333'}">${im[p.type]||'•'}</span><span>${p.text||''}</span></div>`).join('')}</div>`;
+  }catch(e){
+    body.innerHTML=`<div class="ai-err">分析エラー: ${e.message} <button class="ai-refresh" onclick="localStorage.removeItem('gemini_api_key');showKeyInput()">キーを再設定</button></div>`;
+  }
+}
+let _aiCache={};
+function _renderAI(body,d){
+  const sc=d.score>=70?'#3B6D11':d.score>=40?'#854F0B':'#A32D2D';
+  const aClr={'強化':['#eaf3de','#3B6D11'],'維持':['#eef0f2','#555'],'抑制':['#fdf1e3','#854F0B'],'削除':['#fcebeb','#A32D2D'],'追加':['#e8f0fb','#1a4db8']};
+  const tag=a=>{const c=aClr[a]||['#f0f0f0','#333'];return '<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:'+c[0]+';color:'+c[1]+';white-space:nowrap">'+(a||'—')+'</span>';};
+  const roasC=r=>r>=600?'#3B6D11':r>=300?'#854F0B':'#A32D2D';
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let h='<div class="ai-score"><div class="ai-overall">'+esc(d.overall)+'</div><div class="ai-meter"><div class="ai-fill" style="width:'+(d.score||50)+'%;background:'+sc+'"></div></div><div class="ai-num">'+(d.score||50)+'/100</div></div>';
+  if(d.summary)h+='<div style="font-size:12.5px;line-height:1.7;color:#4a3340;margin:10px 2px">'+esc(d.summary)+'</div>';
+  if(d.target_roas)h+='<div style="margin:10px 2px;padding:10px 12px;background:#faf4ec;border-left:3px solid #C8A882;border-radius:4px;font-size:12px;line-height:1.6;color:#5a4250"><b>目標ROAS提案</b>　'+esc(d.target_roas)+'</div>';
+  const rows=(arr,kind)=>arr.map(x=>{
+    const label=kind==='item'?((x.ysrid?esc(x.ysrid)+' ':'')+esc(x.name)):('「'+esc(x.kw)+'」'+(x.group?' / '+esc(x.group):''));
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f0e8ec">'
+      +'<div style="flex-shrink:0;width:40px">'+tag(x.action)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:#3a2832;display:flex;gap:8px;align-items:center"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span>'+(x.roas?'<span style="flex-shrink:0;font-size:11px;color:'+roasC(x.roas)+'">ROAS '+x.roas+'%</span>':'')+'</div>'
+      +'<div style="font-size:11.5px;color:#6a5560;line-height:1.5;margin-top:2px">'+esc(x.root)+'</div></div></div>';
+  }).join('');
+  const items=Array.isArray(d.items)?d.items:[],kws=Array.isArray(d.keywords)?d.keywords:[];
+  if(items.length)h+='<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:#5C3D52;margin-bottom:2px">アイテムマッチ：品番別アクション</div>'+rows(items,'item')+'</div>';
+  if(kws.length)h+='<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:#5C3D52;margin-bottom:2px">キーワード広告：KW別アクション</div>'+rows(kws,'kw')+'</div>';
+  if(!items.length&&!kws.length&&!d.summary)h+='<div class="ai-err">'+esc(d.overall||'分析結果が空です')+'</div>';
+  body.innerHTML=h;
+}
+async function runAI(force){
+  const body=document.getElementById('ai-body');
+  if(!body)return;
+  const ck=period+'|'+cmpPeriod;
+  if(_aiCache[ck]&&!force){_renderAI(body,_aiCache[ck]);return;}
+  body.innerHTML='<div class="ai-loading"><div class="spinner"></div>AI分析中（品番別・KW別）...</div>';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        system:`品質管理専門家AIです。以下データに基づき簡潔に答えてください。\n${summary()}`,
-        messages:history})
-    });
-    const d=await res.json();
-    const rep=d.content?.[0]?.text||'エラーが発生しました';
-    rmTyping(tid);addMsg('ai',rep);
-    history.push({role:'assistant',content:rep});
-    if(history.length>20)history=history.slice(-20);
-  }catch(e){rmTyping(tid);addMsg('ai','エラーが発生しました。');}
-  document.getElementById('chat-send').disabled=false;
+    let u=API+'?type=ai_analysis&period='+encodeURIComponent(period);
+    if(cmpPeriod&&cmpPeriod!=='none')u+='&compare='+encodeURIComponent(cmpPeriod);
+    const res=await fetch(u);
+    const gj=await res.json();
+    if(!gj.ok){
+      const er=String(gj.error||'');
+      const msg=/quota|exceeded|rate/i.test(er)
+        ? 'Geminiの無料枠の上限に達しました。数分待って「再分析」を押すか、APIキーに課金を有効化してください。'
+        : (er||'APIエラー');
+      throw new Error(msg);
+    }
+    const d=gj.data;
+    if(!d||typeof d!=='object')throw new Error('分析データが空');
+    _aiCache[ck]=d;
+    _renderAI(body,d);
+  }catch(e){
+    body.innerHTML='<div class="ai-err">分析エラー: '+e.message+' <button class="ai-refresh" onclick="runAI(true)">再試行</button></div>';
+  }
 }
-
-function useSug(el){document.getElementById('chat-inp').value=el.textContent;sendChat();}
-
-function addMsg(role,text){
-  const m=document.getElementById('chat-msgs');
-  const d=document.createElement('div');
-  d.className=`cmsg ${role}`;
-  d.innerHTML=`<div class="cavatar">${role==='ai'?'✦':'·'}</div><div class="cbubble">${text.replace(/\n/g,'<br>')}</div>`;
-  m.appendChild(d);m.scrollTop=m.scrollHeight;return d;
+const _ss={};
+function sortT(tbl,key,th){
+  const p=_ss[tbl]||{};
+  const dir=p.key===key?(p.dir==='asc'?'desc':'asc'):'desc';
+  _ss[tbl]={key,dir};
+  if(tbl==='items')renderItems({key,dir});
+  if(tbl==='grp')renderGrp({key,dir});
+  if(tbl==='kw')renderKw({key,dir});
 }
-function addTyping(){
-  const m=document.getElementById('chat-msgs');
-  const id='ty-'+Date.now();
-  const d=document.createElement('div');d.className='cmsg ai';d.id=id;
-  d.innerHTML=`<div class="cavatar">✦</div><div class="cbubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
-  m.appendChild(d);m.scrollTop=m.scrollHeight;return id;
-}
-function rmTyping(id){document.getElementById(id)?.remove();}
 </script>
 </body>
 </html>
