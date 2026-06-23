@@ -100,9 +100,32 @@ body { font-family: 'Zen Kaku Gothic New', sans-serif; background: var(--cream);
 .match-radio { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--mauve); }
 .num-filter { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--mauve); }
 .num-filter input { width: 70px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; font-family: inherit; }
+
+/* パスワードゲート */
+.pw-gate { position: fixed; inset: 0; background: var(--plum); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 16px; }
+.pw-gate.hidden { display: none; }
+.pw-box { background: white; border-radius: 16px; padding: 40px 48px; text-align: center; box-shadow: var(--shadow-lg); }
+.pw-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--plum); margin-bottom: 8px; letter-spacing: 0.08em; }
+.pw-sub { font-size: 12px; color: var(--mauve); margin-bottom: 24px; }
+.pw-input { width: 100%; padding: 10px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--charcoal); outline: none; margin-bottom: 12px; }
+.pw-input:focus { border-color: var(--plum); }
+.pw-btn { width: 100%; padding: 10px; background: var(--plum); color: white; border: none; border-radius: 8px; font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.pw-btn:hover { background: var(--mauve); }
+.pw-err { font-size: 12px; color: #c0392b; margin-top: 8px; display: none; }
 </style>
 </head>
 <body>
+
+
+<div class="pw-gate" id="pwGate">
+  <div class="pw-box">
+    <div class="pw-title">tu-hacci</div>
+    <div class="pw-sub">Yahoo! 広告ダッシュボード</div>
+    <input type="password" class="pw-input" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">ログイン</button>
+    <div class="pw-err" id="pwErr">パスワードが違います</div>
+  </div>
+</div>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
@@ -216,6 +239,16 @@ body { font-family: 'Zen Kaku Gothic New', sans-serif; background: var(--cream);
 </div>
 
 <script>
+
+function checkPw() {
+  const val = document.getElementById('pwInput').value;
+  if (val === 'yahoohamadanobiru28') {
+    document.getElementById('pwGate').classList.add('hidden');
+  } else {
+    document.getElementById('pwErr').style.display = 'block';
+  }
+}
+
 const API_BASE = '/api/data';
 let allItemsData = [];
 let allKwGroupData = [];
@@ -426,7 +459,7 @@ function renderItemsTable() {
 
   // 集計モード
   if (iTabMode === 'ysrid') {
-    data = aggBy(data, ['ysrid', 'item_name']);
+    data = aggBy(data, ['ysrid']);
   } else if (iTabMode === 'kw') {
     data = aggBy(data, ['search_keyword']);
   }
