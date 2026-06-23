@@ -51,12 +51,14 @@ export default async function handler(req, res) {
         ORDER BY date ASC
       `;
     } else if (type === "items") {
-      // 商品別ランキング
+      // 商品別ランキング（品番×キーワード×キャンペーン別）
       query = `
         SELECT
           ysrid,
           item_name,
           campaign_name,
+          search_keyword,
+          category_name,
           SUM(imps) as imps,
           SUM(clicks) as clicks,
           SUM(use_amount) as cost,
@@ -67,9 +69,9 @@ export default async function handler(req, res) {
         FROM \`tu-hacci-ad.yahoo_ads.item_daily\`
         WHERE date BETWEEN '${since}' AND '${until}'
           AND use_amount > 0
-        GROUP BY ysrid, item_name, campaign_name
+        GROUP BY ysrid, item_name, campaign_name, search_keyword, category_name
         ORDER BY cost DESC
-        LIMIT 50
+        LIMIT 100
       `;
     } else if (type === "keywords") {
       // KWグループ別集計

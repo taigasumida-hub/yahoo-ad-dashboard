@@ -647,7 +647,9 @@ function renderItemsTable(data) {
   const thead = `<thead><tr>
     <th>品番</th>
     <th>商品名</th>
-    <th>キャンペーン</th>
+    <th>広告グループ</th>
+    <th>検索キーワード</th>
+    <th>カテゴリ</th>
     <th class="num">広告費</th>
     <th class="num">売上</th>
     <th class="num">ROAS</th>
@@ -657,8 +659,10 @@ function renderItemsTable(data) {
   </tr></thead>`;
   const rows = data.map(r => `<tr>
     <td><code style="font-size:11px">${r.ysrid || '-'}</code></td>
-    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item_name}">${r.item_name || '-'}</td>
-    <td>${campaignBadge(r.campaign_name)}</td>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item_name}">${r.item_name || '-'}</td>
+    <td>${campaignBadge(r.campaign_name)} ${r.campaign_name}</td>
+    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.search_keyword}">${r.search_keyword || '-'}</td>
+    <td style="font-size:11px;color:var(--mauve);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.category_name || '-'}</td>
     <td class="num">${yen(r.cost)}</td>
     <td class="num">${yen(r.sales)}</td>
     <td class="num">${roasPill(r.roas)}</td>
