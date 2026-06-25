@@ -318,6 +318,51 @@ body {
 .tbl-match { font-size: 11px; color: var(--mauve); display: flex; align-items: center; gap: 4px; }
 .tbl-nf { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--mauve); }
 .tbl-nf input { width: 64px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; font-family: inherit; }
+
+/* 順位監視 */
+.rank-badge { display:inline-block; min-width:30px; text-align:center; padding:2px 8px; border-radius:6px; font-weight:700; font-size:12px; }
+.rank-org { background:#1a734018; color:#1a7340; }
+.rank-ad  { background:#b07a0018; color:#b07a00; }
+.rank-none{ background:#c0392b12; color:#c0392b; font-weight:500; }
+.src-badge { display:inline-block; padding:1px 7px; border-radius:10px; font-size:10px; font-weight:500; }
+.src-manual { background:var(--mauve); color:white; }
+.src-auto   { background:var(--light-gold); color:var(--charcoal); }
+.src-excl   { background:#c0392b18; color:#c0392b; }
+.strat-jack { background:var(--plum); color:white; padding:1px 7px; border-radius:10px; font-size:10px; }
+.strat-roas { background:var(--muted-sage); color:white; padding:1px 7px; border-radius:10px; font-size:10px; }
+.mini-btn { padding:3px 10px; border:1px solid var(--border); background:white; border-radius:6px; font-size:11px; font-family:inherit; cursor:pointer; color:var(--charcoal); transition:all .15s; }
+.mini-btn:hover { border-color:var(--mauve); color:var(--plum); }
+.mini-btn.danger:hover { border-color:#c0392b; color:#c0392b; }
+.mini-btn.solid { background:var(--plum); color:white; border-color:var(--plum); }
+.mini-btn.solid:hover { background:var(--mauve); }
+.set-field { display:flex; flex-direction:column; gap:3px; }
+.set-field label { font-size:10px; color:var(--mauve); letter-spacing:0.03em; }
+.set-field input { width:90px; padding:5px 8px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:inherit; }
+.comp-row { display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid var(--border); }
+.comp-row.own { background:#9B6B7A12; border-radius:6px; }
+.comp-thumb { width:44px; height:44px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--pale-blush); }
+.comp-main { flex:1; min-width:0; }
+.comp-name { font-size:11px; color:var(--charcoal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.comp-meta { font-size:10px; color:var(--mauve); margin-top:2px; }
+.comp-store { font-size:10px; color:var(--mauve); }
+.clickable-row { cursor:pointer; }
+.clickable-row:hover { background:var(--pale-blush); }
+.clickable-row.selected { background:#9B6B7A1a; }
+.row-input { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.row-input input[type=text] { padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:inherit; }
+.row-input select { padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:inherit; background:white; }
+.ai-card { background:linear-gradient(135deg,#fff,#FBF7F2); border:1px solid var(--border); border-radius:12px; padding:18px 20px; }
+.ai-head { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+.ai-score { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:400; color:var(--plum); line-height:1; }
+.ai-overall { font-size:15px; font-weight:700; color:var(--charcoal); }
+.ai-summary { font-size:12px; color:var(--charcoal); line-height:1.7; margin-bottom:6px; }
+.ai-target { font-size:11px; color:var(--mauve); background:var(--pale-blush); padding:8px 12px; border-radius:8px; margin-bottom:12px; }
+.act-pill { display:inline-block; padding:1px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+.act-強化 { background:#1a734018; color:#1a7340; }
+.act-維持 { background:#b07a0018; color:#b07a00; }
+.act-抑制 { background:#c0392b18; color:#c0392b; }
+.act-追加 { background:var(--plum); color:white; }
+.act-削除 { background:var(--charcoal); color:white; }
 </style>
 </head>
 <body>
@@ -344,6 +389,7 @@ body {
     <button class="nav-tab active" onclick="showPage('overview')">サマリー</button>
     <button class="nav-tab" onclick="showPage('item')">アイテムマッチ</button>
     <button class="nav-tab" onclick="showPage('kw')">キーワード広告</button>
+    <button class="nav-tab" onclick="showPage('rank')">順位監視</button>
   </div>
 </nav>
 
@@ -382,6 +428,13 @@ body {
     <div class="table-scroll">
       <table class="data-table" id="tableCampaign"></table>
     </div>
+  </div>
+  <div class="card section-gap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="card-title" style="margin:0">🤖 AI広告分析（順位連動）</div>
+      <button class="mini-btn solid" id="aiRunBtn" onclick="runAI(true)">AI分析を実行</button>
+    </div>
+    <div id="aiBody"><div style="font-size:12px;color:var(--mauve)">「AI分析を実行」を押すと、品番・キーワードごとの強化／抑制提案を表示します（検索順位を加味）。</div></div>
   </div>
 </div>
 
@@ -464,6 +517,74 @@ body {
   </div>
 </div>
 
+<!-- 順位監視ページ -->
+<div class="page" id="page-rank">
+  <!-- 統合ビュー -->
+  <div class="card section-gap">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+      <div class="card-title" style="margin:0">監視キーワード × 順位 × 広告</div>
+      <button class="mini-btn" id="rankRefreshBtn" onclick="loadRankAll()">↻ 順位データ更新</button>
+    </div>
+    <div style="font-size:11px;color:var(--mauve);margin-bottom:8px">行をクリックすると下部に順位推移と競合一覧が出ます。消化金額・CV・ROASは「商品広告2＋全商品広告2＋キーワード広告」の3グループ合算（選択期間）、順位は最新スナップショットです。</div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableRankKw"></table>
+    </div>
+  </div>
+
+  <!-- 推移 & 競合 -->
+  <div class="grid-2 section-gap">
+    <div class="card">
+      <div class="card-title" id="rankHistTitle">順位推移（KWを選択）</div>
+      <div class="chart-wrap"><canvas id="chartRankHist"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="rankCompTitle">検索結果の中身（KWを選択）</div>
+      <div id="rankCompList" style="max-height:340px;overflow-y:auto"><div style="font-size:12px;color:var(--mauve);padding:12px">上の表からキーワードを選んでください。</div></div>
+    </div>
+  </div>
+
+  <!-- 監視設定 -->
+  <div class="card section-gap">
+    <div class="card-title">監視設定</div>
+    <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+      <div class="set-field"><label>広告消化上位 自動監視数</label><input type="number" id="setTopN"></div>
+      <div class="set-field"><label>消化額 集計遡り日数</label><input type="number" id="setDays"></div>
+      <div class="set-field"><label>取得ページ数(1P≒44位)</label><input type="number" id="setPages"></div>
+      <div class="set-field"><label>目標ROAS(%)</label><input type="number" id="setTargetRoas"></div>
+      <div class="set-field"><label>ジャックROAS下限(%)</label><input type="number" id="setRoasFloor"></div>
+      <button class="mini-btn solid" onclick="saveRankSettings()">設定を保存</button>
+    </div>
+    <div style="font-size:11px;color:var(--mauve);margin-top:8px">保存内容は次回のスクレイパ実行（毎時）から反映されます。</div>
+  </div>
+
+  <!-- 手動キーワード -->
+  <div class="card section-gap">
+    <div class="card-title">手動監視キーワード</div>
+    <div class="row-input">
+      <input type="text" id="mkKeyword" placeholder="キーワード（例：育乳ブラ）" style="width:200px">
+      <select id="mkStrategy">
+        <option value="">戦略なし</option>
+        <option value="jack">jack（ジャック）</option>
+        <option value="roas">roas（ROAS維持）</option>
+      </select>
+      <input type="text" id="mkNote" placeholder="メモ（任意）" style="width:160px">
+      <button class="mini-btn solid" onclick="addManualKeyword()">追加</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableRankConfig"></table>
+    </div>
+  </div>
+
+  <!-- 自動監視プレビュー -->
+  <div class="card section-gap">
+    <div class="card-title">広告消化上位（自動監視プレビュー）</div>
+    <div style="font-size:11px;color:var(--mauve);margin-bottom:8px">商品広告2＋全商品広告2＋キーワード広告の3グループを合算した消化金額の上位キーワード。除外したいものは「除外」を押すと監視対象から外れます。</div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableSpenders"></table>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // パスワード
@@ -490,6 +611,14 @@ let iCampFilter = 'all';
 let charts = {};
 let iSortCol = 'cost'; let iSortDir = -1;
 let kwSortCol = 'cost'; let kwSortDir = -1;
+// 順位監視 / AI
+let rankKwData = [];
+let rankConfigData = [];
+let rankSpenders = [];
+let rankLoaded = false;
+let selectedRankKw = null;
+let rankSortCol = 'cost'; let rankSortDir = -1;
+let _aiCache = {};
 
 // ============================================================
 // 日付
@@ -524,14 +653,24 @@ function showPage(name) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   event.target.classList.add('active');
+  if (name === 'rank' && !rankLoaded) loadRankAll();
 }
 
 // ============================================================
 // API
 // ============================================================
-async function fetchData(type) {
+async function fetchData(type, extra='') {
   const { since, until } = getDates();
-  const res = await fetch(`${API_BASE}?type=${type}&since=${since}&until=${until}`);
+  const res = await fetch(`${API_BASE}?type=${type}&since=${since}&until=${until}${extra}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function postData(body) {
+  const res = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -861,6 +1000,254 @@ async function loadAll() {
     btn.classList.remove('loading');
     btn.innerHTML = '↻ 更新';
   }
+}
+
+// ============================================================
+// 順位監視
+// ============================================================
+function rankBadgeOrganic(v){ return v==null?'<span class="rank-badge rank-none">圏外</span>':`<span class="rank-badge rank-org">${v}位</span>`; }
+function rankBadgeAd(v){ return v==null?'<span style="color:var(--mauve);font-size:11px">-</span>':`<span class="rank-badge rank-ad">${v}位</span>`; }
+
+async function loadRankAll(){
+  const btn = document.getElementById('rankRefreshBtn');
+  if(btn){ btn.textContent='取得中...'; btn.disabled=true; }
+  try{
+    const [kws, config, settings, spenders] = await Promise.all([
+      fetchData('rank_keywords').catch(()=>[]),
+      fetchData('rank_config').catch(()=>[]),
+      fetchData('rank_settings').catch(()=>[]),
+      fetchData('kw_top_spenders', '&days='+(document.getElementById('setDays')?.value||30)+'&n='+(document.getElementById('setTopN')?.value||100)).catch(()=>[]),
+    ]);
+    rankKwData = Array.isArray(kws)?kws:[];
+    rankConfigData = Array.isArray(config)?config:[];
+    rankSpenders = Array.isArray(spenders)?spenders:[];
+    renderRankKw();
+    renderRankConfig();
+    renderRankSettings(Array.isArray(settings)&&settings[0]?settings[0]:{});
+    renderSpenders();
+    rankLoaded = true;
+  }catch(err){
+    console.error(err);
+    document.getElementById('tableRankKw').innerHTML = '<tbody><tr><td style="padding:16px;color:var(--mauve)">順位データの取得に失敗しました。テーブル(rank_*)が作成済みか確認してください。'+(err.message||'')+'</td></tr></tbody>';
+  }finally{
+    if(btn){ btn.textContent='↻ 順位データ更新'; btn.disabled=false; }
+  }
+}
+
+function sortRank(col){ rankSortDir = rankSortCol===col?rankSortDir*-1:-1; rankSortCol=col; renderRankKw(); }
+
+function renderRankKw(){
+  const s=rankSortCol, d=rankSortDir;
+  const th=(l,k,isNum=true)=>thS(l,k,'sortRank',s,d,isNum);
+  let data=[...rankKwData].sort((a,b)=>{
+    const av=a[s]==null?(d===1?Infinity:-Infinity):Number(a[s])||0;
+    const bv=b[s]==null?(d===1?Infinity:-Infinity):Number(b[s])||0;
+    return av<bv?d:-d;
+  });
+  const thead=`<thead><tr><th>${''}</th>${th('キーワード','keyword',false)}${th('自然順位','own_organic')}${th('広告順位','own_ad')}${th('自社数','own_items')}${th('消化金額','cost')}${th('CV','orders')}${th('ROAS','roas')}${th('売上','sales')}</tr></thead>`;
+  const rows=data.map(r=>`<tr class="clickable-row ${selectedRankKw===r.keyword?'selected':''}" onclick="selectRankKw('${(r.keyword||'').replace(/'/g,"\\'")}')">
+    <td style="color:var(--mauve);font-size:11px">▸</td>
+    <td><strong>${r.keyword||'-'}</strong></td>
+    <td class="num">${rankBadgeOrganic(r.own_organic)}</td>
+    <td class="num">${rankBadgeAd(r.own_ad)}</td>
+    <td class="num">${r.own_items??0}</td>
+    <td class="num">${yen(r.cost)}</td>
+    <td class="num">${num(r.orders)}</td>
+    <td class="num">${r.roas==null?'-':roasPill(r.roas)}</td>
+    <td class="num">${yen(r.sales)}</td>
+  </tr>`).join('');
+  document.getElementById('tableRankKw').innerHTML = thead+'<tbody>'+(rows||'<tr><td colspan="9" style="text-align:center;color:var(--mauve);padding:20px">監視データがまだありません（スクレイパ未実行）</td></tr>')+'</tbody>';
+}
+
+async function selectRankKw(kw){
+  selectedRankKw = kw;
+  renderRankKw();
+  document.getElementById('rankCompTitle').innerHTML = `検索結果の中身：<strong>${kw}</strong>`;
+  document.getElementById('rankHistTitle').innerHTML = `順位推移：<strong>${kw}</strong>`;
+  document.getElementById('rankCompList').innerHTML = '<div style="font-size:12px;color:var(--mauve);padding:12px">読み込み中...</div>';
+  try{
+    const ekw = '&keyword='+encodeURIComponent(kw);
+    const [comp, hist] = await Promise.all([
+      fetchData('rank_competitors', ekw),
+      fetchData('rank_history', ekw),
+    ]);
+    renderRankComp(comp);
+    renderRankHistChart(hist);
+  }catch(err){
+    document.getElementById('rankCompList').innerHTML = '<div style="font-size:12px;color:#c0392b;padding:12px">取得エラー: '+(err.message||'')+'</div>';
+  }
+}
+
+function renderRankComp(rows){
+  if(!rows||!rows.length){ document.getElementById('rankCompList').innerHTML='<div style="font-size:12px;color:var(--mauve);padding:12px">データなし</div>'; return; }
+  document.getElementById('rankCompList').innerHTML = rows.map(r=>{
+    const badge = r.is_ad?`<span class="rank-badge rank-ad" style="min-width:24px">PR${r.rank_ad||''}</span>`:`<span class="rank-badge rank-org" style="min-width:24px">${r.rank_organic||r.rank_overall}</span>`;
+    const rev = r.review_count!=null?`★${r.review_score??'-'}（${num(r.review_count)}）`:'';
+    return `<div class="comp-row ${r.is_own_store?'own':''}">
+      <div style="width:36px;text-align:center">${badge}</div>
+      <img class="comp-thumb" src="${r.thumbnail_url||''}" onerror="this.style.visibility='hidden'">
+      <div class="comp-main">
+        <div class="comp-name" title="${(r.item_name||'').replace(/"/g,'')}">${r.is_own_store?'🏠 ':''}${r.item_name||'-'}</div>
+        <div class="comp-meta">${r.store_id||'-'}${r.item_code?' / '+r.item_code:''} ・ ${r.price!=null?yen(r.price):'-'} ・ ${rev}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRankHistChart(hist){
+  destroyChart('chartRankHist');
+  const ctx=document.getElementById('chartRankHist').getContext('2d');
+  const labels=(hist||[]).map(h=>{const d=new Date(h.snapshot_at); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+'時';});
+  charts['chartRankHist']=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'自然順位',data:(hist||[]).map(h=>h.own_organic),borderColor:'#1a7340',backgroundColor:'#1a734018',tension:0.2,pointRadius:2,spanGaps:true},
+      {label:'広告順位',data:(hist||[]).map(h=>h.own_ad),borderColor:'#b07a00',backgroundColor:'transparent',tension:0.2,pointRadius:2,spanGaps:true,borderDash:[4,3]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'Zen Kaku Gothic New',size:11},color:'#2D2228'}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:9},maxRotation:45}},
+        y:{reverse:true,beginAtZero:false,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v+'位'},title:{display:true,text:'順位（上が上位）',font:{size:10}}}}}
+  });
+}
+
+// ---- 設定 ----
+function renderRankSettings(s){
+  document.getElementById('setTopN').value = s.auto_top_n ?? 100;
+  document.getElementById('setDays').value = s.trailing_days ?? 30;
+  document.getElementById('setPages').value = s.scrape_pages ?? 3;
+  document.getElementById('setTargetRoas').value = s.target_roas ?? 550;
+  document.getElementById('setRoasFloor').value = s.roas_floor ?? 300;
+}
+async function saveRankSettings(){
+  try{
+    await postData({action:'settings_save',
+      auto_top_n:+document.getElementById('setTopN').value,
+      trailing_days:+document.getElementById('setDays').value,
+      scrape_pages:+document.getElementById('setPages').value,
+      target_roas:+document.getElementById('setTargetRoas').value,
+      roas_floor:+document.getElementById('setRoasFloor').value,
+    });
+    alert('設定を保存しました。次回のスクレイパ実行から反映されます。');
+    loadRankAll();
+  }catch(err){ alert('保存エラー: '+err.message); }
+}
+
+// ---- 手動キーワード ----
+function renderRankConfig(){
+  const manual = rankConfigData.filter(r=>r.source==='manual');
+  const thead=`<thead><tr><th>キーワード</th><th>戦略</th><th>メモ</th><th>状態</th><th></th></tr></thead>`;
+  const rows=manual.map(r=>{
+    const strat = r.strategy==='jack'?'<span class="strat-jack">jack</span>':r.strategy==='roas'?'<span class="strat-roas">roas</span>':'<span style="color:var(--mauve);font-size:11px">-</span>';
+    const k=(r.keyword||'').replace(/'/g,"\\'");
+    return `<tr>
+      <td><strong>${r.keyword}</strong></td>
+      <td>${strat}</td>
+      <td style="font-size:11px;color:var(--mauve)">${r.note||''}</td>
+      <td>${r.active?'<span class="src-badge src-manual">監視中</span>':'<span class="src-badge src-excl">停止</span>'}</td>
+      <td style="text-align:right">
+        <button class="mini-btn" onclick="toggleConfig('${k}','manual',${r.active?'false':'true'})">${r.active?'停止':'再開'}</button>
+        <button class="mini-btn danger" onclick="deleteConfig('${k}','manual')">削除</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tableRankConfig').innerHTML = thead+'<tbody>'+(rows||'<tr><td colspan="5" style="text-align:center;color:var(--mauve);padding:14px">手動キーワードはまだありません</td></tr>')+'</tbody>';
+}
+async function addManualKeyword(){
+  const kw=document.getElementById('mkKeyword').value.trim();
+  if(!kw){ alert('キーワードを入力してください'); return; }
+  try{
+    await postData({action:'config_upsert',keyword:kw,source:'manual',
+      strategy:document.getElementById('mkStrategy').value||null,
+      note:document.getElementById('mkNote').value||null,active:true});
+    document.getElementById('mkKeyword').value='';
+    document.getElementById('mkNote').value='';
+    loadRankAll();
+  }catch(err){ alert('追加エラー: '+err.message); }
+}
+async function deleteConfig(kw,source){
+  if(!confirm(`「${kw}」を削除しますか？`)) return;
+  try{ await postData({action:'config_delete',keyword:kw,source}); loadRankAll(); }
+  catch(err){ alert('削除エラー: '+err.message); }
+}
+async function toggleConfig(kw,source,active){
+  try{ await postData({action:'config_upsert',keyword:kw,source,active}); loadRankAll(); }
+  catch(err){ alert('更新エラー: '+err.message); }
+}
+
+// ---- 自動監視プレビュー ----
+function renderSpenders(){
+  const excluded = new Set(rankConfigData.filter(r=>r.source==='auto_excluded'&&r.active).map(r=>r.keyword));
+  const thead=`<thead><tr><th>#</th><th>キーワード</th><th class="num">消化金額</th><th class="num">CV</th><th class="num">ROAS</th><th class="num">売上</th><th>状態</th><th></th></tr></thead>`;
+  const rows=rankSpenders.map((r,i)=>{
+    const ex = excluded.has(r.keyword);
+    const k=(r.keyword||'').replace(/'/g,"\\'");
+    return `<tr style="${ex?'opacity:.45':''}">
+      <td style="color:var(--mauve);font-size:11px">${i+1}</td>
+      <td><strong>${r.keyword}</strong></td>
+      <td class="num">${yen(r.spend)}</td>
+      <td class="num">${num(r.orders)}</td>
+      <td class="num">${roasPill(r.roas)}</td>
+      <td class="num">${yen(r.sales)}</td>
+      <td>${ex?'<span class="src-badge src-excl">除外中</span>':'<span class="src-badge src-auto">自動監視</span>'}</td>
+      <td style="text-align:right">${ex
+        ? `<button class="mini-btn" onclick="toggleConfig('${k}','auto_excluded',false)">監視に戻す</button>`
+        : `<button class="mini-btn danger" onclick="excludeAuto('${k}')">除外</button>`}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tableSpenders').innerHTML = thead+'<tbody>'+(rows||'<tr><td colspan="8" style="text-align:center;color:var(--mauve);padding:14px">広告消化データがありません</td></tr>')+'</tbody>';
+}
+async function excludeAuto(kw){
+  try{ await postData({action:'config_upsert',keyword:kw,source:'auto_excluded',active:true}); loadRankAll(); }
+  catch(err){ alert('除外エラー: '+err.message); }
+}
+
+// ============================================================
+// AI分析
+// ============================================================
+async function runAI(force){
+  const { since, until } = getDates();
+  const key = since+'|'+until;
+  const body = document.getElementById('aiBody');
+  const btn = document.getElementById('aiRunBtn');
+  if(!force && _aiCache[key]){ _renderAI(_aiCache[key]); return; }
+  btn.disabled=true; btn.textContent='分析中...';
+  body.innerHTML='<div style="font-size:12px;color:var(--mauve)">AIが分析中です（10〜20秒）...</div>';
+  try{
+    const d = await fetchData('ai_analysis');
+    if(d.error){ body.innerHTML='<div style="font-size:12px;color:#c0392b">'+d.error+'</div>'; }
+    else { _aiCache[key]=d; _renderAI(d); }
+  }catch(err){
+    body.innerHTML='<div style="font-size:12px;color:#c0392b">AI分析エラー: '+(err.message||'')+'</div>';
+  }finally{ btn.disabled=false; btn.textContent='↻ 再分析'; }
+}
+function _renderAI(d){
+  const actPill=a=>`<span class="act-pill act-${a}">${a}</span>`;
+  const itemRows=(d.items||[]).map(it=>`<tr>
+    <td><code style="font-size:11px">${it.ysrid||'-'}</code><div style="font-size:10px;color:var(--mauve)">${it.name||''}</div></td>
+    <td class="num">${it.roas!=null?Math.round(it.roas)+'%':'-'}</td>
+    <td>${actPill(it.action)}</td>
+    <td style="font-size:11px">${it.root||''}</td></tr>`).join('');
+  const kwRows=(d.keywords||[]).map(k=>`<tr>
+    <td><strong>${k.kw||'-'}</strong></td>
+    <td class="num">${k.roas!=null?Math.round(k.roas)+'%':'-'}</td>
+    <td>${actPill(k.action)}</td>
+    <td style="font-size:11px">${k.root||''}</td></tr>`).join('');
+  document.getElementById('aiBody').innerHTML=`
+    <div class="ai-card">
+      <div class="ai-head">
+        <div class="ai-score">${d.score??'-'}</div>
+        <div><div class="ai-overall">${d.overall||''}</div><div style="font-size:10px;color:var(--mauve)">100点満点</div></div>
+      </div>
+      <div class="ai-summary">${d.summary||''}</div>
+      ${d.target_roas?`<div class="ai-target">🎯 ${d.target_roas}</div>`:''}
+      <div class="grid-2">
+        <div><div style="font-size:11px;font-weight:700;color:var(--plum);margin-bottom:6px">品番別アクション</div>
+          <table class="data-table"><thead><tr><th>品番</th><th class="num">ROAS</th><th>判断</th><th>根拠</th></tr></thead><tbody>${itemRows||'<tr><td colspan=4 style="color:var(--mauve);padding:8px">-</td></tr>'}</tbody></table></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--plum);margin-bottom:6px">キーワード別アクション</div>
+          <table class="data-table"><thead><tr><th>KW</th><th class="num">ROAS</th><th>判断</th><th>根拠</th></tr></thead><tbody>${kwRows||'<tr><td colspan=4 style="color:var(--mauve);padding:8px">-</td></tr>'}</tbody></table></div>
+      </div>
+    </div>`;
 }
 
 initDates();
